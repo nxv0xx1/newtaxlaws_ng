@@ -53,7 +53,6 @@ const BlinkingCursor = () => (
 
 export function TaxClarityForm() {
   const [isClient, setIsClient] = useState(false);
-  const [step, setStep] = useState(0);
   const [results, setResults] = useState<TaxCalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationFeedback, setCalculationFeedback] = useState<string[]>([]);
@@ -66,6 +65,8 @@ export function TaxClarityForm() {
   const formContainerRef = useRef<HTMLDivElement>(null);
   const samplesRef = useRef<HTMLDivElement>(null);
   const incomeInputRef = useRef<HTMLInputElement>(null);
+  const incomeContainerRef = useRef<HTMLDivElement>(null);
+
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -99,6 +100,12 @@ export function TaxClarityForm() {
       setIsCalculating(true);
       setCalculationFeedback([]);
       setResults(null);
+      
+      // Scroll down to the feedback section as it appears
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100)
+
 
       const feedbacks = [
         "checking the shiny new 2026 rules...",
@@ -123,41 +130,19 @@ export function TaxClarityForm() {
       resultsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [results]);
-
-  const advanceStep = (currentStep: number) => {
-    if (step === currentStep) {
-      setStep(currentStep + 1);
-    }
-  };
-  
-  useEffect(() => {
-    if (step > 0 && step < 10) { // Don't scroll for final submit step
-      const nextSection = formContainerRef.current?.querySelector(`[data-section-id="${step}"]`);
-      if (nextSection) {
-        nextSection.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-      }
-    }
-  }, [step]);
-  
-  const handleIncomeBlur = () => {
-    form.trigger('income').then(isValid => {
-      if (isValid) advanceStep(0);
-    });
-  };
   
   const handleSourceChange = (value: "salary" | "business" | "mixed") => {
       form.setValue('source', value);
       if (value === 'salary') {
         form.setValue('cashPercentage', 0);
-        setStep(10); // Skip to submit
       } else {
         if (value === 'business') {
+          form.setValue('businessIncomePercentage', 100); // Business is 100% of income
           form.setValue('cashPercentage', 50);
         } else { // mixed
           form.setValue('businessIncomePercentage', 50);
           form.setValue('cashPercentage', 40);
         }
-        advanceStep(1);
       }
   };
 
@@ -192,15 +177,12 @@ export function TaxClarityForm() {
       cashPercentage: 0,
       businessIncomePercentage: 50,
     });
-    setStep(0);
     if(samplesRef.current) {
       samplesRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
   
   const handleTryOwnIncome = () => {
-    const incomeSection = formContainerRef.current?.querySelector('[data-section-id="0"]');
-
     setResults(null);
     setCalculationFeedback([]);
     setActivePreset(null);
@@ -211,10 +193,9 @@ export function TaxClarityForm() {
         cashPercentage: 0,
         businessIncomePercentage: 50,
     });
-    setStep(0);
 
-    if (incomeSection) {
-        incomeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (incomeContainerRef.current) {
+        incomeContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => {
             incomeInputRef.current?.focus();
             setIsInputGlowing(true);
@@ -234,19 +215,6 @@ export function TaxClarityForm() {
   
   const periodDivisor = form.getValues('period') === 'monthly' ? 12 : 1;
   const periodName = form.getValues('period');
-
-  const renderSection = (s: number, children: React.ReactNode, isVisible: boolean = true) => (
-    <div
-      data-section-id={s}
-      className={cn(
-        "transition-opacity duration-700 ease-in-out",
-        (!isVisible || step < s) && "opacity-0 h-0 overflow-hidden pointer-events-none",
-        s > 0 && "mt-10"
-      )}
-    >
-      {children}
-    </div>
-  );
 
   if (!isClient) {
     return null;
@@ -298,115 +266,110 @@ export function TaxClarityForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-6">
-          <div className={cn("space-y-10 transition-opacity duration-500", (isCalculating || results) ? 'opacity-50' : 'opacity-100')}>
-            {renderSection(0, 
-              <div className="space-y-4">
-                  <Prompt>How much do you earn each month or year?</Prompt>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                    <FormField
-                      control={form.control}
-                      name="income"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className={cn("h-14 text-lg", isInputGlowing && "highlight-glow")} {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="period"
-                      render={({ field }) => (
-                        <FormItem className="pt-1">
-                          <FormControl>
-                            <RadioGroup onValueChange={(v) => { field.onChange(v); advanceStep(0) }} defaultValue={field.value} className="flex items-center space-x-6">
-                              <FormItem className="flex items-center space-x-2 space-y-0">
-                                <FormControl><RadioGroupItem value="monthly" /></FormControl>
-                                <Label className="font-normal cursor-pointer">Monthly</Label>
-                              </FormItem>
-                              <FormItem className="flex items-center space-x-2 space-y-0">
-                                <FormControl><RadioGroupItem value="annually" /></FormControl>
-                                <Label className="font-normal cursor-pointer">Annually</Label>
-                              </FormItem>
-                            </RadioGroup>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground pt-1">We'll figure out monthly ↔ yearly for you.</p>
-              </div>
-            )}
+          <div className={cn("space-y-10 transition-opacity duration-500", (isCalculating || results) ? 'opacity-50 pointer-events-none' : 'opacity-100')}>
+            <div ref={incomeContainerRef} className="space-y-4">
+                <Prompt>How much do you earn each month or year?</Prompt>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                  <FormField
+                    control={form.control}
+                    name="income"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className={cn("h-14 text-lg", isInputGlowing && "highlight-glow")} {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="period"
+                    render={({ field }) => (
+                      <FormItem className="pt-1">
+                        <FormControl>
+                          <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-6">
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl><RadioGroupItem value="monthly" /></FormControl>
+                              <Label className="font-normal cursor-pointer">Monthly</Label>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl><RadioGroupItem value="annually" /></FormControl>
+                              <Label className="font-normal cursor-pointer">Annually</Label>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground pt-1">We'll figure out monthly ↔ yearly for you.</p>
+            </div>
 
-            {renderSection(1, 
+            <div className="space-y-4">
+              <Prompt>Where does your money come from?</Prompt>
+              <FormField
+                control={form.control}
+                name="source"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <RadioGroup 
+                        onValueChange={(v: "salary" | "business" | "mixed") => handleSourceChange(v)}
+                        defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          <FormItem>
+                            <FormControl><RadioGroupItem value='salary' className="sr-only peer" /></FormControl>
+                            <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
+                              Salary job
+                            </Label>
+                          </FormItem>
+                          <FormItem>
+                            <FormControl><RadioGroupItem value='business' className="sr-only peer" /></FormControl>
+                            <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
+                              My own business
+                            </Label>
+                          </FormItem>
+                          <FormItem>
+                            <FormControl><RadioGroupItem value='mixed' className="sr-only peer" /></FormControl>
+                            <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
+                              A mix of both
+                            </Label>
+                          </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {source === 'mixed' && (
               <div className="space-y-4">
-                <Prompt>Where does your money come from?</Prompt>
+                <Prompt>What's the mix? ({form.watch('businessIncomePercentage')}%)</Prompt>
+                <p className="text-xs text-muted-foreground -mt-2">Drag the slider to show how your income is split between salary and business.</p>
                 <FormField
                   control={form.control}
-                  name="source"
+                  name="businessIncomePercentage"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <RadioGroup 
-                          onValueChange={(v: "salary" | "business" | "mixed") => handleSourceChange(v)}
-                          defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            <FormItem>
-                              <FormControl><RadioGroupItem value='salary' className="sr-only peer" /></FormControl>
-                              <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
-                                Salary job
-                              </Label>
-                            </FormItem>
-                            <FormItem>
-                              <FormControl><RadioGroupItem value='business' className="sr-only peer" /></FormControl>
-                              <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
-                                My own business
-                              </Label>
-                            </FormItem>
-                            <FormItem>
-                              <FormControl><RadioGroupItem value='mixed' className="sr-only peer" /></FormControl>
-                              <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
-                                A mix of both
-                              </Label>
-                            </FormItem>
-                        </RadioGroup>
+                        <Slider
+                          value={[field.value || 50]}
+                          max={100}
+                          step={5}
+                          onValueChange={value => field.onChange(value[0])}
+                        />
                       </FormControl>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Mostly Salary</span>
+                        <span>Mostly Business</span>
+                      </div>
                     </FormItem>
                   )}
                 />
               </div>
             )}
-            
-            {renderSection(2, (
-                <div className="space-y-4">
-                  <Prompt>What's the mix? ({form.watch('businessIncomePercentage')}%)</Prompt>
-                  <p className="text-xs text-muted-foreground -mt-2">Drag the slider to show how your income is split between salary and business.</p>
-                  <FormField
-                    control={form.control}
-                    name="businessIncomePercentage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Slider
-                            value={[field.value || 50]}
-                            max={100}
-                            step={5}
-                            onValueChange={value => field.onChange(value[0])}
-                            onValueCommit={() => advanceStep(2)}
-                          />
-                        </FormControl>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Mostly Salary</span>
-                          <span>Mostly Business</span>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-            ), source === 'mixed')}
 
-            {renderSection(source === 'mixed' ? 3 : 2, (
+            {source !== 'salary' && (
               <div className="space-y-4">
                 <Prompt>
                   {source === 'business'
@@ -430,7 +393,6 @@ export function TaxClarityForm() {
                           max={100} 
                           step={5} 
                           onValueChange={value => field.onChange(value[0])} 
-                          onValueCommit={() => setStep(10)} 
                         />
                       </FormControl>
                       <div className="flex justify-between text-xs text-muted-foreground">
@@ -441,9 +403,9 @@ export function TaxClarityForm() {
                   )}
                 />
               </div>
-            ), source !== 'salary')}
+            )}
             
-            {renderSection(10, <Button type="submit" size="lg" disabled={isCalculating} className="w-full !mt-12">
+            <Button type="submit" size="lg" disabled={isCalculating} className="w-full !mt-12">
                 {isCalculating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -453,7 +415,6 @@ export function TaxClarityForm() {
                   "Calculate My Tax"
                 )}
             </Button>
-            )}
           </div>
 
           {(isCalculating || results) && (
