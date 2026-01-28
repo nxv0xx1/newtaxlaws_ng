@@ -58,9 +58,9 @@ export default function Home() {
         <div className="mb-12 space-y-6">
           <Tabs defaultValue="individuals" className="w-full">
             <TabsList className="grid w-full grid-cols-1 h-auto gap-2 md:grid-cols-3">
-              <TabsTrigger value="individuals" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Individuals & Workers</TabsTrigger>
-              <TabsTrigger value="small-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Small Businesses & Side Hustles</TabsTrigger>
-              <TabsTrigger value="large-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Larger Companies & Foreign Businesses</TabsTrigger>
+              <TabsTrigger value="individuals" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">People & Workers</TabsTrigger>
+              <TabsTrigger value="small-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
+              <TabsTrigger value="large-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
             </TabsList>
             
             <TabsContent value="individuals" className="mt-6">
