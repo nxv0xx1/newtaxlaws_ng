@@ -64,7 +64,7 @@ export default function Home() {
           <div>
             <h2 className="font-medium text-foreground mb-2">About this tool</h2>
             <p className="leading-relaxed">
-              This tool provides a simplified estimate of how recent tax law changes in Nigeria might affect your personal income tax. It is for informational purposes only and is not a substitute for professional legal or financial advice. The calculations are based on a simplified model and certain assumptions.
+              This free tool gives a quick, simplified estimate of how 2026 personal income tax changes affect your take-home pay. Built for clarity, not advice. Independent — not affiliated with government.
             </p>
           </div>
           <div>
@@ -79,6 +79,9 @@ export default function Home() {
               Contact us
             </a>
             .
+          </p>
+          <p className="text-center text-xs pt-8 text-muted-foreground/80">
+            &copy; 2024 TaxClarity NG. All rights reserved.
           </p>
         </footer>
       </div>
