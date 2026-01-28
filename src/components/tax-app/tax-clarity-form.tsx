@@ -170,7 +170,35 @@ export function TaxClarityForm() {
   );
 
   if (!isClient) {
-    return null;
+    return (
+        <div ref={formContainerRef}>
+          <div className="mb-12 space-y-6">
+            <Prompt>Try a sample calculation (no typing needed!)</Prompt>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="w-full text-left p-4 border-2 border-transparent rounded-lg bg-card space-y-1 h-24"></div>
+              <div className="w-full text-left p-4 border-2 border-transparent rounded-lg bg-card space-y-1 h-24"></div>
+              <div className="w-full text-left p-4 border-2 border-transparent rounded-lg bg-card space-y-1 h-24"></div>
+            </div>
+          </div>
+          
+          <div className="mb-10">
+            <Prompt>Or enter your own details below</Prompt>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-10">
+              <div className="space-y-4">
+                  <Prompt>How much do you earn each month or year?</Prompt>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                    <div className="h-14"></div>
+                    <div className="h-10"></div>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-1">We'll automatically convert monthly ↔ yearly.</p>
+              </div>
+            </div>
+          </div>
+      </div>
+    );
   }
 
   return (
@@ -396,7 +424,7 @@ export function TaxClarityForm() {
                     </li>
                 </ul>
                 <div className="text-xs text-muted-foreground pt-4">
-                  <p><strong>Just so you know:</strong> This is a simple estimate. We guess that cash pay might lower your taxable amount. We don't include things like state taxes or personal claims.</p>
+                  <p>Quick estimate using federal rules from the Nigeria Tax Act 2025 (starts 2026). Not official advice — things like deductions or state taxes not included here.</p>
                 </div>
               </div>
 
