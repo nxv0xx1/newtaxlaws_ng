@@ -48,6 +48,7 @@ const BlinkingCursor = () => (
 );
 
 export function TaxClarityForm() {
+  const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(0);
   const [results, setResults] = useState<{ taxBefore: number; taxAfter: number } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -68,6 +69,10 @@ export function TaxClarityForm() {
   });
 
   const source = form.watch("source");
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const onSubmit = async (data: FormData) => {
       setIsCalculating(true);
@@ -163,6 +168,10 @@ export function TaxClarityForm() {
       {children}
     </div>
   );
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div ref={formContainerRef}>
