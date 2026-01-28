@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TaxClarity NG',
+  title: 'newtaxlaws_ng',
   description: 'See how the new tax laws in Nigeria affect your money.',
 };
 
