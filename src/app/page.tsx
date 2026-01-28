@@ -34,6 +34,30 @@ export default function Home() {
           </div>
         </header>
 
+        <div className="mb-12 space-y-4">
+          <div className="font-code text-muted-foreground">
+              <span className="text-primary">{'>'}</span> Key changes starting 2026 (simplified):
+          </div>
+          <ul className="space-y-3 text-muted-foreground/90 pl-6">
+              <li className="flex items-start">
+                  <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                  <span>₦800,000 annual tax-free threshold for individuals.</span>
+              </li>
+              <li className="flex items-start">
+                  <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                  <span>Progressive rates: 0% on first ₦800k, then 15% on next bands, higher rates (up to ~25%) for high earners.</span>
+              </li>
+              <li className="flex items-start">
+                  <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                  <span>More relief for low-income & minimum wage earners.</span>
+              </li>
+              <li className="flex items-start">
+                  <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                  <span>Tool assumes cash portion of business/mixed income may affect taxable base.</span>
+              </li>
+          </ul>
+        </div>
+
         <TaxClarityForm />
 
         <footer className="mt-24 text-sm text-muted-foreground space-y-8">
