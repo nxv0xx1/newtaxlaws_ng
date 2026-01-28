@@ -51,10 +51,6 @@ export default function Home() {
                   <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
                   <span>People who earn less will pay much less tax, or none at all.</span>
               </li>
-              <li className="flex items-start">
-                  <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                  <span>If you get paid in cash, this tool makes a smart guess on how it affects your tax.</span>
-              </li>
           </ul>
         </div>
 

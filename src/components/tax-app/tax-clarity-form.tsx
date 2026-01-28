@@ -297,7 +297,7 @@ export function TaxClarityForm() {
             {source !== 'salary' && renderSection(2,
               <div className="space-y-4">
                 <Prompt>How much of your pay is cash? ({form.watch('cashPercentage')}%)</Prompt>
-                 <p className="text-xs text-muted-foreground -mt-2">Guess the percent of your income that's in cash. This is common for business owners. The tool will use this to make a better tax guess.</p>
+                 <p className="text-xs text-muted-foreground -mt-2">Many business owners receive some money in cash. We make a simple guess on how much the tax office might not see — this can lower the tax estimate a bit.</p>
                 <FormField
                   control={form.control}
                   name="cashPercentage"
