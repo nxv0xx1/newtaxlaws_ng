@@ -59,6 +59,7 @@ export function TaxClarityForm() {
   const [calculationFeedback, setCalculationFeedback] = useState<string[]>([]);
   const [showReportCTA, setShowReportCTA] = useState(false);
   const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
+  const [isResultsVisible, setIsResultsVisible] = useState(false);
   
   const resultsRef = useRef<HTMLDivElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
@@ -83,15 +84,26 @@ export function TaxClarityForm() {
     setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    if (results && !isCalculating) {
+      const timer = setTimeout(() => setIsResultsVisible(true), 100);
+      return () => clearTimeout(timer);
+    }
+    if (!results) {
+      setIsResultsVisible(false);
+    }
+  }, [results, isCalculating]);
+
   const calculateAndShowResults = async (data: FormData) => {
       setIsCalculating(true);
       setCalculationFeedback([]);
       setResults(null);
 
       const feedbacks = [
-        "running the 2026 numbers...",
-        "breaking down the tax bands...",
-        "finalizing your estimate...",
+        "checking the shiny new 2026 rules...",
+        "applying bands...",
+        "doing the final sum...",
+        "here is your future tax bill...",
       ];
       
       for (let i = 0; i < feedbacks.length; i++) {
@@ -466,7 +478,7 @@ export function TaxClarityForm() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">You keep</p>
-                  <p className="text-2xl font-bold">{formatCurrency(results.netIncome / periodDivisor)}
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(results.netIncome / periodDivisor)}
                     <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
                   </p>
                    <p className="text-xs text-muted-foreground">({formatCurrency(results.netIncome)}/year)</p>
@@ -484,15 +496,20 @@ export function TaxClarityForm() {
                       {results.breakdown.map((item, index) => {
                           const colors = ["bg-primary/20", "bg-primary/40", "bg-primary/60", "bg-primary/80", "bg-primary"];
                           if (item.taxable <= 0) return null;
+                          const widthPercent = (item.taxable / results.annualIncome) * 100;
                           return (
                               <div
                                   key={index}
-                                  className={colors[index % colors.length]}
-                                  style={{ width: `${(item.taxable / results.annualIncome) * 100}%` }}
+                                  className={cn(colors[index % colors.length], "transition-all duration-1000 ease-out")}
+                                  style={{ width: isResultsVisible ? `${widthPercent}%` : '0%' }}
                                   title={`${item.bandDescription} taxed at ${item.rate * 100}%`}
                               />
                           );
                       })}
+                  </div>
+                   <div className="flex justify-between text-xs font-code text-muted-foreground mt-1 px-1">
+                      <span>₦0</span>
+                      <span>{formatCurrency(results.annualIncome)}</span>
                   </div>
               </div>
 
@@ -514,8 +531,12 @@ export function TaxClarityForm() {
                 </ul>
               </div>
 
+              <div className="text-xs text-center text-muted-foreground">
+                <p>Simplified federal estimate using 2026 rules. Ignores personal reliefs, deductions, state taxes.</p>
+              </div>
+
               {/* Explanation */}
-              <div className="space-y-4">
+              <div className="space-y-4 !mt-12">
                 <Prompt>Why this happens:</Prompt>
                 <ul className="space-y-3 text-muted-foreground/90 pl-6">
                     <li className="flex items-start">
@@ -533,9 +554,6 @@ export function TaxClarityForm() {
                         </li>
                     )}
                 </ul>
-                <div className="text-xs text-muted-foreground pt-4">
-                  <p>Simplified federal estimate using 2026 rules. Ignores personal reliefs, deductions, state taxes.</p>
-                </div>
               </div>
 
               {activePreset && (
