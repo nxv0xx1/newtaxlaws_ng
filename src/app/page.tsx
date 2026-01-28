@@ -1,4 +1,6 @@
 import { TaxClarityForm } from '@/components/tax-app/tax-clarity-form';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -12,6 +14,24 @@ export default function Home() {
           <p className="mt-2 text-muted-foreground">
             See how the new tax laws affect your money.
           </p>
+          
+          <div className="mt-8 space-y-6">
+            <p className="leading-relaxed text-muted-foreground/90">
+              Taxes in Nigeria often feel as predictable as Lagos traffic at rush hour — confusing, stressful, and full of surprises. The 2026 reforms introduce a higher tax-free threshold (₦800,000 annually) and more progressive rates to simplify things and give low earners relief.
+            </p>
+            
+            <div className="space-y-3">
+                <div className="font-code text-muted-foreground">
+                    <span className="text-primary">{'>'}</span> Want the full official text?
+                </div>
+                <a href="https://www.premiumtimesng.com/news/top-news/847380-download-certified-true-copies-of-nigerias-new-tax-laws.html" target="_blank" rel="noopener noreferrer" className="inline-block">
+                    <Button className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
+                        Download Tax Laws PDFs
+                        <ArrowRight className="ml-2" />
+                    </Button>
+                </a>
+            </div>
+          </div>
         </header>
 
         <TaxClarityForm />
