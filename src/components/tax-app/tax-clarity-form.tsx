@@ -266,7 +266,7 @@ export function TaxClarityForm() {
           <button
             type="button"
             onClick={() => handlePreset('salary', { income: 150000, period: 'monthly', source: 'salary' })}
-            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-primary/5 hover:border-primary"
+            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'salary'}
           >
             <p className="font-medium text-card-foreground">Example: ₦150k monthly salary</p>
@@ -275,7 +275,7 @@ export function TaxClarityForm() {
           <button
             type="button"
             onClick={() => handlePreset('business', { income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}
-            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-primary/5 hover:border-primary"
+            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'business'}
           >
             <p className="font-medium text-card-foreground">Example: ₦2m yearly from a business</p>
@@ -284,7 +284,7 @@ export function TaxClarityForm() {
           <button
             type="button"
             onClick={() => handlePreset('mixed', { income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}
-            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-primary/5 hover:border-primary"
+            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'mixed'}
           >
             <p className="font-medium text-card-foreground">Example: ₦500k monthly from different sources</p>
