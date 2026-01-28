@@ -10,7 +10,6 @@ interface TaxReportProps {
   data: {
     formData: TaxInput;
     newTaxResults: TaxCalculationResult;
-    oldTaxResults: TaxCalculationResult;
   };
 }
 
@@ -29,33 +28,8 @@ const renderBreakdown = (breakdown: TaxCalculationResult['breakdown']) => breakd
     </tr>
 ));
 
-const renderBandChart = (result: TaxCalculationResult) => {
-    const colors = ["#dcfce7", "#bbf7d0", "#86efac", "#4ade80", "#22c55e"];
-    if (result.taxableIncome <= 0) return <div className="text-muted-foreground">Taxable income is zero or less.</div>;
-    return (
-        <>
-            <div className="w-full flex h-4 rounded overflow-hidden bg-gray-200 text-xs text-white">
-                {result.breakdown.map((item, index) => {
-                    if (item.taxable <= 0) return '';
-                    const widthPercent = (item.taxable / result.taxableIncome) * 100;
-                    return <div key={index} style={{ width: `${widthPercent}%`, backgroundColor: colors[index % colors.length] }} className="flex items-center justify-center" title={`${item.bandDescription}: ${formatCurrency(item.taxable)} @ ${item.rate*100}%`}>{widthPercent > 10 ? `${Math.round(widthPercent)}%` : ''}</div>
-                })}
-            </div>
-            <div className="w-full flex justify-between text-xs mt-1">
-                <span>₦0</span>
-                <span>{formatCurrency(result.taxableIncome)}</span>
-            </div>
-        </>
-    );
-};
-
 export function TaxReport({ data }: TaxReportProps) {
-  const { formData, newTaxResults, oldTaxResults } = data;
-
-  const savings = oldTaxResults.totalTax - newTaxResults.totalTax;
-  const savingsPercentage = oldTaxResults.totalTax > 0 ? (savings / oldTaxResults.totalTax) * 100 : (newTaxResults.totalTax > 0 ? -100 : 0);
-  const savingsClass = savings >= 0 ? 'text-green-600' : 'text-red-600';
-  const savingsText = savings >= 0 ? 'Savings' : 'Increase';
+  const { formData, newTaxResults } = data;
   
   const handlePrint = () => {
     window.print();
@@ -78,7 +52,7 @@ export function TaxReport({ data }: TaxReportProps) {
 
         <header className="text-center border-b pb-4 mb-8">
             <h1 className="text-4xl font-bold text-gray-800">Personalized Tax Report</h1>
-            <p className="text-gray-500 mt-2">Comparison of Pre-2026 vs. 2026 Tax Rules</p>
+            <p className="text-gray-500 mt-2">Your Estimated 2026 Tax Liability</p>
         </header>
 
         <section className="mb-8">
@@ -91,55 +65,39 @@ export function TaxReport({ data }: TaxReportProps) {
                 {formData.source === 'mixed' && <div><strong>Business Income Split:</strong> {formData.businessIncomePercentage}%</div>}
             </div>
         </section>
-
-        <section className="mb-8">
-             <h2 className="text-2xl font-semibold text-gray-700 border-b pb-2 mb-4">Summary of Changes</h2>
-             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-gray-500">Old Tax (Pre-2026)</div>
-                    <div className="text-3xl font-bold text-gray-800 mt-1">{formatCurrency(oldTaxResults.totalTax)}</div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-gray-500">New Tax (2026 Rules)</div>
-                    <div className="text-3xl font-bold text-gray-800 mt-1">{formatCurrency(newTaxResults.totalTax)}</div>
-                </div>
-                <div className={cn('p-4 rounded-lg', savings >= 0 ? 'bg-green-50' : 'bg-red-50')}>
-                    <div className={cn('font-semibold', savingsClass)}>Annual {savingsText}</div>
-                    <div className={cn('text-3xl font-bold mt-1', savingsClass)}>{formatCurrency(Math.abs(savings))}</div>
-                    <div className={cn('text-sm mt-1', savingsClass)}>({savingsPercentage.toFixed(1)}%)</div>
-                </div>
-             </div>
-        </section>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 gap-10">
             <section>
-                <h3 className="text-xl font-semibold text-gray-700 mb-3">Pre-2026 Tax Calculation</h3>
-                <div className="bg-gray-50 p-4 rounded-md space-y-2">
-                     <p><strong>Annual Gross Income:</strong> {formatCurrency(oldTaxResults.annualIncome)}</p>
-                     <p><strong>Taxable Income:</strong> <span className="font-mono">{formatCurrency(oldTaxResults.taxableIncome)}</span></p>
-                     <p className="text-xs text-gray-500">(After Consolidated Relief Allowance)</p>
+                <h3 className="text-xl font-semibold text-gray-700 mb-3">2026 Tax Calculation Summary</h3>
+                <div className="bg-green-50 p-6 rounded-md space-y-4">
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-sm text-gray-600">Annual Gross Income</p>
+                            <p className="font-bold text-lg">{formatCurrency(newTaxResults.annualIncome)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-600">Taxable Income</p>
+                            <p className="font-bold text-lg font-mono">{formatCurrency(newTaxResults.taxableIncome)}</p>
+                        </div>
+                     </div>
+                     <p className="text-xs text-gray-500">(After business/cash assumptions if applicable)</p>
                      <hr className="my-3"/>
-                     <p><strong>Total Annual Tax:</strong> <span className="font-bold text-xl">{formatCurrency(oldTaxResults.totalTax)}</span></p>
-                     <p><strong>Take-Home Pay:</strong> <span className="font-bold text-xl text-blue-600">{formatCurrency(oldTaxResults.netIncome)}</span></p>
-                </div>
-            </section>
-            
-            <section>
-                <h3 className="text-xl font-semibold text-gray-700 mb-3">2026 Tax Calculation</h3>
-                <div className="bg-green-50 p-4 rounded-md space-y-2">
-                     <p><strong>Annual Gross Income:</strong> {formatCurrency(newTaxResults.annualIncome)}</p>
-                     <p><strong>Taxable Income:</strong> <span className="font-mono">{formatCurrency(newTaxResults.taxableIncome)}</span></p>
-                     <p className="text-xs text-gray-500">(After business/cash assumptions)</p>
-                     <hr className="my-3"/>
-                     <p><strong>Total Annual Tax:</strong> <span className="font-bold text-xl">{formatCurrency(newTaxResults.totalTax)}</span></p>
-                     <p><strong>Take-Home Pay:</strong> <span className="font-bold text-xl text-green-700">{formatCurrency(newTaxResults.netIncome)}</span></p>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-sm text-gray-600">Total Annual Tax</p>
+                            <p className="font-bold text-2xl text-red-600">{formatCurrency(newTaxResults.totalTax)}</p>
+                        </div>
+                         <div>
+                            <p className="text-sm text-gray-600">Final Take-Home Pay</p>
+                            <p className="font-bold text-2xl text-green-700">{formatCurrency(newTaxResults.netIncome)}</p>
+                        </div>
+                     </div>
                 </div>
             </section>
         </div>
         
-        <section className="mt-8">
-             <h3 className="text-xl font-semibold text-gray-700 mb-3">2026 Taxable Income Bands</h3>
-             {renderBandChart(newTaxResults)}
+        <section className="mt-10">
+             <h3 className="text-xl font-semibold text-gray-700 mb-3">2026 Tax Band Breakdown</h3>
              <table className="w-full mt-4 text-left text-sm">
                 <thead>
                     <tr className="border-b-2">
@@ -157,7 +115,6 @@ export function TaxReport({ data }: TaxReportProps) {
                 </tbody>
              </table>
         </section>
-
 
         <footer className="mt-12 pt-6 border-t text-xs text-gray-500">
             <h4 className="font-semibold text-sm text-gray-600 mb-2">Assumptions & Disclaimer</h4>

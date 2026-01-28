@@ -12,7 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ReportData {
     formData: TaxInput;
     newTaxResults: TaxCalculationResult;
-    oldTaxResults: TaxCalculationResult;
 }
 
 function ReportPageContent() {

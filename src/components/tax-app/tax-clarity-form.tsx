@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { calculateTaxes, calculateOldTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
+import { calculateTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -31,7 +31,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { verifyPaystackTransaction } from "@/app/actions/payment";
 
 const formSchema = z.object({
   income: z.coerce.number().min(1, { message: "Please enter your income." }),
@@ -273,12 +272,10 @@ export function TaxClarityForm() {
         }
 
         const formData = form.getValues();
-        const oldTaxResults = calculateOldTaxes(formData);
 
         const reportData = {
             formData,
             newTaxResults: results,
-            oldTaxResults,
         };
 
         try {
@@ -653,19 +650,16 @@ export function TaxClarityForm() {
                   </div>
                   
                   <h3 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground tracking-tight max-w-lg mx-auto">
-                    For just ₦500, unlock your personalized 2026 Tax Report — displayed instantly on this page.
+                    For just ₦500, unlock your personalized 2026 Tax Report.
                   </h3>
                   
                   <div className="mt-6 max-w-sm mx-auto text-left">
                      <p className="font-medium text-foreground mb-3">What you'll get:</p>
                     <ul className="space-y-2 text-muted-foreground/90">
                         {[
-                            "Full before-2026 vs after-2026 comparison with exact savings",
-                            "Complete tax band breakdown + visual bar chart",
-                            "Personalized cash income analysis + sensitivity (what if cash % changes?)",
+                            "Complete tax band breakdown",
                             "Monthly and annual take-home pay summary",
                             "Effective tax rate",
-                            "Practical insights & tips",
                             "All assumptions explained",
                             "Clean, printable layout",
                         ].map((item, i) => (

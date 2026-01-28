@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { calculateTaxes, calculateOldTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
+import { calculateTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -216,12 +216,10 @@ export function AdminTaxClarityForm() {
     
     const formData = form.getValues();
     const newTaxResults = results;
-    const oldTaxResults = calculateOldTaxes(formData);
 
     const reportData = {
         formData,
         newTaxResults,
-        oldTaxResults,
     };
 
     try {
