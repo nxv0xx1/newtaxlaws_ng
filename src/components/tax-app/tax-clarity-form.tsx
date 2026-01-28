@@ -77,7 +77,7 @@ export function TaxClarityForm() {
       cashPercentage: 0,
       businessIncomePercentage: 50,
     },
-    mode: "onBlur",
+    mode: "onChange",
   });
 
   const source = form.watch("source");
@@ -94,10 +94,13 @@ export function TaxClarityForm() {
       form.setValue('businessIncomePercentage', 100);
       form.setValue('cashPercentage', 50);
     } else if (source === 'mixed') {
-      form.setValue('businessIncomePercentage', 50);
-      form.setValue('cashPercentage', 40);
+      // Don't reset if already being adjusted
+      if(form.getValues('businessIncomePercentage') === 0 || form.getValues('businessIncomePercentage') === 100) {
+        form.setValue('businessIncomePercentage', 50);
+        form.setValue('cashPercentage', 40);
+      }
     }
-  }, [source, form.setValue]);
+  }, [source, form]);
 
   useEffect(() => {
     if (results && !isCalculating) {
@@ -228,7 +231,7 @@ export function TaxClarityForm() {
           <button
             type="button"
             onClick={() => handlePreset('salary', { income: 150000, period: 'monthly', source: 'salary' })}
-            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
+            className="w-full text-left p-4 border-2 rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'salary'}
           >
             <p className="font-medium text-card-foreground">Example: ₦150k monthly salary</p>
@@ -237,7 +240,7 @@ export function TaxClarityForm() {
           <button
             type="button"
             onClick={() => handlePreset('business', { income: 2000000, period: 'annually', source: 'business', cashPercentage: 50 })}
-            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
+            className="w-full text-left p-4 border-2 rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'business'}
           >
             <p className="font-medium text-card-foreground">Example: ₦2m yearly from a business</p>
@@ -246,7 +249,7 @@ export function TaxClarityForm() {
           <button
             type="button"
             onClick={() => handlePreset('mixed', { income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 40, businessIncomePercentage: 50 })}
-            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
+            className="w-full text-left p-4 border-2 rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'mixed'}
           >
             <p className="font-medium text-card-foreground">Example: ₦500k monthly from different sources</p>
@@ -314,29 +317,41 @@ export function TaxClarityForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <RadioGroup 
+                      <RadioGroup
                         onValueChange={field.onChange}
-                        value={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          <FormItem>
-                            <FormControl><RadioGroupItem value='salary' className="sr-only peer" /></FormControl>
-                            <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
-                              Salary job
-                            </Label>
-                          </FormItem>
-                          <FormItem>
-                            <FormControl><RadioGroupItem value='business' className="sr-only peer" /></FormControl>
-                            <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
-                              My own business
-                            </Label>
-                          </FormItem>
-                          <FormItem>
-                            <FormControl><RadioGroupItem value='mixed' className="sr-only peer" /></FormControl>
-                            <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
-                              A mix of both
-                            </Label>
-                          </FormItem>
+                        value={field.value}
+                        className="grid grid-cols-2 md:grid-cols-3 gap-3"
+                      >
+                        <div>
+                          <RadioGroupItem value="salary" id="source-salary" className="sr-only peer" />
+                          <Label
+                            htmlFor="source-salary"
+                            className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors"
+                          >
+                            Salary job
+                          </Label>
+                        </div>
+                        <div>
+                          <RadioGroupItem value="business" id="source-business" className="sr-only peer" />
+                          <Label
+                            htmlFor="source-business"
+                            className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors"
+                          >
+                            My own business
+                          </Label>
+                        </div>
+                        <div>
+                          <RadioGroupItem value="mixed" id="source-mixed" className="sr-only peer" />
+                          <Label
+                            htmlFor="source-mixed"
+                            className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors"
+                          >
+                            A mix of both
+                          </Label>
+                        </div>
                       </RadioGroup>
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
