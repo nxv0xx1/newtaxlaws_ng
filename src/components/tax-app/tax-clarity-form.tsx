@@ -20,6 +20,17 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { calculateTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { verifyPaystackTransaction } from "@/app/actions/payment";
 
 const formSchema = z.object({
   income: z.coerce.number().min(1, { message: "Please enter your income." }),
@@ -39,6 +50,25 @@ type PresetData = {
     businessIncomePercentage?: number;
 };
 
+// Declare PaystackPop type for TypeScript
+interface PaystackPop {
+  setup(options: PaystackOptions): {
+    openIframe(): void;
+  };
+}
+interface PaystackOptions {
+  key: string;
+  email: string;
+  amount: number;
+  ref?: string;
+  onClose: () => void;
+  callback: (response: { reference: string }) => void;
+}
+declare global {
+  interface Window {
+    PaystackPop: PaystackPop;
+  }
+}
 
 const Prompt = ({ children }: { children: React.ReactNode }) => (
   <div className="flex items-center gap-2 text-foreground font-code">
@@ -60,6 +90,10 @@ export function TaxClarityForm() {
   const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
   const [isResultsVisible, setIsResultsVisible] = useState(false);
   const [isInputGlowing, setIsInputGlowing] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [emailForReport, setEmailForReport] = useState("");
+  const [isPaying, setIsPaying] = useState(false);
+  const { toast } = useToast();
   
   const resultsRef = useRef<HTMLDivElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
@@ -92,15 +126,20 @@ export function TaxClarityForm() {
       form.setValue('cashPercentage', 0);
     } else if (source === 'business') {
       form.setValue('businessIncomePercentage', 100);
-      form.setValue('cashPercentage', 50);
-    } else if (source === 'mixed') {
       // Don't reset if already being adjusted
+      if (form.getValues('cashPercentage') === 0) {
+        form.setValue('cashPercentage', 50);
+      }
+    } else if (source === 'mixed') {
       if(form.getValues('businessIncomePercentage') === 0 || form.getValues('businessIncomePercentage') === 100) {
         form.setValue('businessIncomePercentage', 50);
+      }
+       if (form.getValues('cashPercentage') === 0) {
         form.setValue('cashPercentage', 40);
       }
     }
   }, [source, form]);
+
 
   useEffect(() => {
     if (results && !isCalculating) {
@@ -117,7 +156,6 @@ export function TaxClarityForm() {
       setCalculationFeedback([]);
       setResults(null);
       
-      // Scroll down to the feedback section as it appears
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100)
@@ -167,7 +205,7 @@ export function TaxClarityForm() {
     calculateAndShowResults(data);
   }
 
-  const resetForm = () => {
+  const resetForm = (scrollToSamples = true) => {
     setResults(null);
     setCalculationFeedback([]);
     setActivePreset(null);
@@ -179,23 +217,13 @@ export function TaxClarityForm() {
       cashPercentage: 0,
       businessIncomePercentage: 50,
     });
-    if(samplesRef.current) {
+     if(scrollToSamples && samplesRef.current) {
       samplesRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
   
   const handleTryOwnIncome = () => {
-    setResults(null);
-    setCalculationFeedback([]);
-    setActivePreset(null);
-    setShowReportCTA(false);
-    form.reset({
-        income: undefined,
-        period: "monthly",
-        source: "salary",
-        cashPercentage: 0,
-        businessIncomePercentage: 50,
-    });
+    resetForm(false);
 
     if (incomeContainerRef.current) {
         incomeContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -205,8 +233,60 @@ export function TaxClarityForm() {
             setTimeout(() => {
               setIsInputGlowing(false);
             }, 2000);
-        }, 300); // Delay focus to allow for scroll
+        }, 300);
     }
+  };
+
+  const handlePayment = () => {
+    if (!emailForReport || !/^\S+@\S+\.\S+$/.test(emailForReport)) {
+        toast({
+            variant: "destructive",
+            title: "Invalid Email",
+            description: "Please enter a valid email address.",
+        });
+        return;
+    }
+    
+    setIsPaying(true);
+
+    const handler = window.PaystackPop.setup({
+      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+      email: emailForReport,
+      amount: 50000, // ₦500 in kobo
+      onClose: () => {
+        toast({
+            title: "Payment Cancelled",
+            description: "You have cancelled the payment.",
+        });
+        setIsPaying(false);
+      },
+      callback: async (response) => {
+        toast({
+            title: "Verifying Payment...",
+            description: "Please wait while we confirm your payment.",
+        });
+
+        const verificationResult = await verifyPaystackTransaction(response.reference);
+
+        if (verificationResult.status === 'success') {
+            toast({
+                title: "Payment Successful!",
+                description: `Your detailed report will be sent to ${verificationResult.data?.email}. Ref: ${response.reference}`,
+                duration: 10000,
+            });
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Payment Verification Failed",
+                description: verificationResult.message || "Please contact support.",
+            });
+        }
+        setIsPaymentDialogOpen(false);
+        setIsPaying(false);
+        setEmailForReport("");
+      },
+    });
+    handler.openIframe();
   };
 
   const formatCurrency = (amount: number) => {
@@ -447,7 +527,7 @@ export function TaxClarityForm() {
           {results && !isCalculating && (
             <div className="relative space-y-8 !mt-12">
               {activePreset && (
-                  <Button variant="ghost" size="icon" onClick={resetForm} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
+                  <Button variant="ghost" size="icon" onClick={() => resetForm()} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
                       <X className="h-5 w-5" />
                       <span className="sr-only">Clear results</span>
                   </Button>
@@ -596,15 +676,52 @@ export function TaxClarityForm() {
                     >
                       Recalculate
                     </Button>
-                    <Button 
-                      type="button" 
-                      size="lg" 
-                      onClick={() => console.log("Get My Report clicked")}
-                      className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
-                    >
-                      Get My Report
-                      <ArrowRight className="ml-2" />
-                    </Button>
+                    <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+                      <DialogTrigger asChild>
+                         <Button 
+                          type="button" 
+                          size="lg" 
+                          className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
+                        >
+                          Get My Report
+                          <ArrowRight className="ml-2" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Get Your Detailed Report</DialogTitle>
+                          <DialogDescription>
+                            Enter your email below to pay with Paystack. Your report will be sent to this address.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <Input 
+                                type="email"
+                                placeholder="you@example.com"
+                                value={emailForReport}
+                                onChange={(e) => setEmailForReport(e.target.value)}
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button
+                              type="button"
+                              size="lg"
+                              className="w-full"
+                              onClick={handlePayment}
+                              disabled={isPaying}
+                            >
+                               {isPaying ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Processing...
+                                </>
+                              ) : (
+                                "Pay ₦500 with Paystack"
+                              )}
+                            </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               )}
