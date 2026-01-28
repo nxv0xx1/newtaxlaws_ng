@@ -17,12 +17,12 @@ export default function Home() {
           
           <div className="mt-8 space-y-6">
             <p className="leading-relaxed text-muted-foreground/90">
-              Taxes in Nigeria often feel as predictable as Lagos traffic at rush hour — confusing, stressful, and full of surprises. The 2026 reforms introduce a higher tax-free threshold (₦800,000 annually) and more progressive rates to simplify things and give low earners relief.
+              Taxes in Nigeria can be a headache, like Lagos traffic. New rules in 2026 are meant to make it simpler. Now the first ₦800,000 you earn in a year is completely tax-free (you pay ₦0 on it).
             </p>
             
             <div className="space-y-3">
                 <div className="font-code text-muted-foreground">
-                    <span className="text-primary">{'>'}</span> Want the full official text?
+                    <span className="text-primary">{'>'}</span> Want the official government document?
                 </div>
                 <a href="https://www.thecable.ng/wp-content/uploads/2026/01/Final-Approved-Copy-for-Print-NIGERIA-TAX-ACT-2025.pdf" target="_blank" rel="noopener noreferrer" className="inline-block">
                     <Button className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
@@ -36,24 +36,24 @@ export default function Home() {
 
         <div className="mb-12 space-y-4">
           <div className="font-code text-muted-foreground">
-              <span className="text-primary">{'>'}</span> Key changes starting 2026 (simplified):
+              <span className="text-primary">{'>'}</span> What's new in 2026 (the simple version):
           </div>
           <ul className="space-y-3 text-muted-foreground/90 pl-6">
               <li className="flex items-start">
                   <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                  <span>₦800,000 annual tax-free threshold for individuals.</span>
+                  <span>The first ₦800,000 you earn each year is now tax-free.</span>
               </li>
               <li className="flex items-start">
                   <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                  <span>Progressive rates: 0% on first ₦800k, then 15% on next bands, higher rates (up to ~25%) for high earners.</span>
+                  <span>You pay 0% tax on your first ₦800k. After that, you only pay tax on the money you earn above that amount.</span>
               </li>
               <li className="flex items-start">
                   <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                  <span>More relief for low-income & minimum wage earners.</span>
+                  <span>People who earn less will pay much less tax, or none at all.</span>
               </li>
               <li className="flex items-start">
                   <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                  <span>Tool assumes cash portion of business/mixed income may affect taxable base.</span>
+                  <span>If you get paid in cash, this tool makes a smart guess on how it affects your tax.</span>
               </li>
           </ul>
         </div>
@@ -64,19 +64,19 @@ export default function Home() {
           <div>
             <h2 className="font-medium text-foreground mb-2">About this tool</h2>
             <p className="leading-relaxed">
-              This free tool gives a quick, simplified estimate of how 2026 personal income tax changes affect your take-home pay. Built for clarity, not advice. Independent — not affiliated with government.
+              This free tool gives a quick guess on how the new 2026 tax rules might change the money you take home. It's for information only, not financial advice. We're not part of the government.
             </p>
           </div>
           <div>
             <h2 className="font-medium text-foreground mb-2">Disclaimer</h2>
             <p className="leading-relaxed">
-              We are not financial advisors. The information provided here is not legal or tax advice. Consult with a qualified professional for advice tailored to your specific situation. We are not liable for any decisions made based on the information from this tool.
+             We are not money experts. This is not official tax advice. Please talk to a real tax professional for help with your own money situation. Any choices you make based on this tool are your own.
             </p>
           </div>
           <p>
-            Feedback or questions?{' '}
+            Got questions or ideas?{' '}
             <a href="mailto:feedback@newtaxlaws.ng" className="underline hover:text-primary transition-colors">
-              Contact us
+              Send us an email
             </a>
             .
           </p>

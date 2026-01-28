@@ -75,9 +75,9 @@ export function TaxClarityForm() {
       setResults(null);
 
       const feedbacks = [
-        "applying pre-2026 tax rules...",
-        "applying new tax laws...",
-        "comparing outcomes...",
+        "checking the old tax rules...",
+        "checking the new 2026 rules...",
+        "comparing what you pay...",
       ];
       
       for (let i = 0; i < feedbacks.length; i++) {
@@ -168,37 +168,37 @@ export function TaxClarityForm() {
   return (
     <div ref={formContainerRef}>
       <div className="mb-12 space-y-6">
-        <Prompt>See it in action — try a sample (no typing needed!)</Prompt>
+        <Prompt>Try a sample to see how it works (no typing needed!)</Prompt>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             type="button"
             onClick={() => handlePreset({ income: 150000, period: 'monthly', source: 'salary' })}
             className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
           >
-            <p className="font-medium text-card-foreground">Sample: ₦150k/month Salary</p>
-            <p className="text-sm text-muted-foreground">Preview: See how the new bands affect a salaried earner.</p>
+            <p className="font-medium text-card-foreground">Example: ₦150k monthly pay</p>
+            <p className="text-sm text-muted-foreground">See what happens for someone paid a regular salary.</p>
           </button>
           <button
             type="button"
             onClick={() => handlePreset({ income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}
             className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
           >
-            <p className="font-medium text-card-foreground">Sample: ₦2m/year Business</p>
-            <p className="text-sm text-muted-foreground">Preview: Explore how cash income estimates change your tax.</p>
+            <p className="font-medium text-card-foreground">Example: ₦2m yearly from a business</p>
+            <p className="text-sm text-muted-foreground">See how getting paid in cash can change your tax.</p>
           </button>
           <button
             type="button"
             onClick={() => handlePreset({ income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}
             className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
           >
-            <p className="font-medium text-card-foreground">Sample: ₦500k/month Mixed</p>
-            <p className="text-sm text-muted-foreground">Preview: Understand the impact on combined income sources.</p>
+            <p className="font-medium text-card-foreground">Example: ₦500k monthly from different sources</p>
+            <p className="text-sm text-muted-foreground">See how it works if you get money from a job and a side hustle.</p>
           </button>
         </div>
       </div>
       
       <div className="mb-10">
-        <Prompt>Or enter your own income</Prompt>
+        <Prompt>Or, type in your own numbers</Prompt>
       </div>
 
       <Form {...form}>
@@ -206,7 +206,7 @@ export function TaxClarityForm() {
           <div className={cn("space-y-10 transition-opacity duration-500", (isCalculating || results) ? 'opacity-50' : 'opacity-100')}>
             {renderSection(0, 
               <div className="space-y-4">
-                  <Prompt>Enter your income</Prompt>
+                  <Prompt>What's your income?</Prompt>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     <FormField
                       control={form.control}
@@ -241,14 +241,14 @@ export function TaxClarityForm() {
                       )}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground pt-1">Monthly or annual? We convert automatically.</p>
+                  <p className="text-xs text-muted-foreground pt-1">Is that per month or per year? We'll figure it out.</p>
               </div>
             )}
 
             {renderSection(1, 
               <div className="space-y-4">
-                <Prompt>Select income source</Prompt>
-                 <p className="text-xs text-muted-foreground -mt-2">Salary: fully traceable | Business/mixed: estimate cash portion below.</p>
+                <Prompt>Where does your money come from?</Prompt>
+                 <p className="text-xs text-muted-foreground -mt-2">Salary is easy to track. For business/mixed income, we'll help you guess the cash part below.</p>
                 <FormField
                   control={form.control}
                   name="source"
@@ -266,14 +266,26 @@ export function TaxClarityForm() {
                             }
                           }}
                           defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {['salary', 'business', 'mixed'].map(source => (
-                            <FormItem key={source}>
-                              <FormControl><RadioGroupItem value={source} className="sr-only peer" /></FormControl>
-                              <Label className="flex h-full items-center justify-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 capitalize transition-colors">
-                                {source}
+                          
+                            <FormItem>
+                              <FormControl><RadioGroupItem value='salary' className="sr-only peer" /></FormControl>
+                              <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
+                                Salary job
                               </Label>
                             </FormItem>
-                          ))}
+                            <FormItem>
+                              <FormControl><RadioGroupItem value='business' className="sr-only peer" /></FormControl>
+                              <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
+                                My own business
+                              </Label>
+                            </FormItem>
+                            <FormItem>
+                              <FormControl><RadioGroupItem value='mixed' className="sr-only peer" /></FormControl>
+                              <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
+                                A mix of both
+                              </Label>
+                            </FormItem>
+                          
                         </RadioGroup>
                       </FormControl>
                     </FormItem>
@@ -284,8 +296,8 @@ export function TaxClarityForm() {
 
             {source !== 'salary' && renderSection(2,
               <div className="space-y-4">
-                <Prompt>Estimate cash income ({form.watch('cashPercentage')}%)</Prompt>
-                 <p className="text-xs text-muted-foreground -mt-2">Estimate % received as cash/untraced (common for business/mixed; lowers taxable estimate in tool).</p>
+                <Prompt>How much of your pay is cash? ({form.watch('cashPercentage')}%)</Prompt>
+                 <p className="text-xs text-muted-foreground -mt-2">Guess the percent of your income that's in cash. This is common for business owners. The tool will use this to make a better tax guess.</p>
                 <FormField
                   control={form.control}
                   name="cashPercentage"
@@ -295,8 +307,8 @@ export function TaxClarityForm() {
                         <Slider defaultValue={[field.value]} max={100} step={5} onValueChange={value => field.onChange(value[0])} onValueCommit={() => advanceStep(2)} />
                       </FormControl>
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Mostly Digital</span>
-                        <span>Mostly Cash</span>
+                        <span>Almost No Cash</span>
+                        <span>Almost All Cash</span>
                       </div>
                     </FormItem>
                   )}
@@ -306,7 +318,7 @@ export function TaxClarityForm() {
             
             {(step >= 2 && source !== 'salary' || step >=1 && source === 'salary') && renderSection(3, <Button type="submit" disabled={isCalculating} className="w-full md:w-auto !mt-12">
                 {isCalculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Calculate Impact
+                See My Tax Change
             </Button>
             )}
           </div>
@@ -329,7 +341,7 @@ export function TaxClarityForm() {
                 {/* Before */}
                 <div>
                   <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-base text-muted-foreground">Before 2026 tax paid ({form.getValues('period')}ly)</span>
+                    <span className="text-base text-muted-foreground">Old tax you paid ({form.getValues('period')}ly)</span>
                     <span className="text-2xl md:text-3xl font-semibold">{formatCurrency(results.taxBefore / periodDivisor)}</span>
                   </div>
                   <div className="bg-muted h-3 rounded-full">
@@ -340,7 +352,7 @@ export function TaxClarityForm() {
                 {/* After */}
                 <div>
                   <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-base text-muted-foreground">After 2026 tax paid ({form.getValues('period')}ly)</span>
+                    <span className="text-base text-muted-foreground">New tax you'll pay ({form.getValues('period')}ly)</span>
                     <span className={cn("text-2xl md:text-3xl font-semibold", isIncrease ? "text-destructive" : "text-primary")}>{formatCurrency(results.taxAfter / periodDivisor)}</span>
                   </div>
                   <div className="bg-muted h-3 rounded-full">
@@ -368,35 +380,35 @@ export function TaxClarityForm() {
 
               {/* Explanation */}
               <div className="space-y-4">
-                <Prompt>Why the change?</Prompt>
+                <Prompt>So, why did your tax change?</Prompt>
                 <ul className="space-y-3 text-muted-foreground/90 pl-6">
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>Your annual income benefits from the new higher tax-free threshold (₦800,000).</span>
+                        <span>Your yearly income is now under the new ₦800,000 "no-tax" amount, which helps a lot.</span>
                     </li>
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
                         <span>
                             {form.getValues('source') === 'salary'
-                            ? 'As a salaried earner, your income is fully assessed under the new structure, but with revised tax bands.'
-                            : `For business/mixed income, our model considers that the cash portion (${form.getValues('cashPercentage')}%) may influence your final taxable amount differently under the new system.`}
+                            ? 'Since you earn a salary, all your pay is counted under the new rules.'
+                            : `Because some of your income is in cash (${form.getValues('cashPercentage')}%), our tool guesses that it might be taxed a bit differently.`}
                         </span>
                     </li>
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>The old system of reliefs combined with rates from 7-24% is being replaced by new progressive bands that change your overall tax.</span>
+                        <span>The old, confusing system is gone. The new system with different tax levels changes how much you pay in total.</span>
                     </li>
                 </ul>
                 <div className="text-xs text-muted-foreground pt-4">
-                  <p><strong>Assumptions:</strong> Simplified federal model; cash income lowers estimated taxable portion for business/mixed; excludes personal deductions, state taxes, VAT.</p>
+                  <p><strong>Just so you know:</strong> This is a simple estimate. We guess that cash pay might lower your taxable amount. We don't include things like state taxes or personal claims.</p>
                 </div>
               </div>
 
               <div className="text-center pt-8">
                 <Button type="button" variant="outline" size="lg" onClick={() => console.log("Get detailed breakdown clicked")}>
-                  Get detailed breakdown (₦500)
+                  Get a Detailed Report (₦500)
                 </Button>
-                <p className="text-xs text-muted-foreground mt-2">Includes full breakdown, assumptions used, and simple insights.</p>
+                <p className="text-xs text-muted-foreground mt-2">See the full numbers, all our guesses, and simple tips.</p>
               </div>
             </div>
           )}
