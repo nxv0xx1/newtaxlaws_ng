@@ -150,7 +150,7 @@ export function TaxClarityForm() {
       source: presetData.source,
       cashPercentage: presetData.cashPercentage ?? form.getValues('cashPercentage'),
     });
-    setStep(4);
+    setStep(source === 'salary' ? 3 : 2);
     
     setTimeout(() => {
       const submitButton = formContainerRef.current?.querySelector('button[type="submit"]');
@@ -171,6 +171,12 @@ export function TaxClarityForm() {
   const periodDivisor = form.getValues('period') === 'monthly' ? 12 : 1;
   const percentageChange = results && results.taxBefore > 0 ? (difference / results.taxBefore) * 100 : results && results.taxAfter > 0 ? 100 : 0;
   const isIncrease = difference > 0;
+
+  const maxTaxForBar = results ? Math.max(results.taxBefore, results.taxAfter, 1) : 1;
+  const barScale = 80; // Bars will take up to 80% of container width
+  const beforeTaxWidth = results ? (results.taxBefore / maxTaxForBar) * barScale : 0;
+  const afterTaxWidth = results ? (results.taxAfter / maxTaxForBar) * barScale : 0;
+  const absDiffAmount = results ? Math.abs(difference) / periodDivisor : 0;
   
   const renderSection = (s: number, children: React.ReactNode) => (
     <div
@@ -259,12 +265,11 @@ export function TaxClarityForm() {
                         <RadioGroup 
                           onValueChange={(v: "salary" | "business" | "mixed") => {
                             field.onChange(v);
-                            if (step === 1) {
-                              if (v === 'salary') {
-                                setStep(3);
-                              } else {
-                                setStep(2);
-                              }
+                            if (v === 'salary') {
+                              advanceStep(1);
+                              setStep(3);
+                            } else {
+                              advanceStep(1);
                             }
                           }}
                           defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -306,7 +311,7 @@ export function TaxClarityForm() {
               </div>
             )}
             
-            {renderSection(3, <Button type="submit" disabled={isCalculating} className="w-full md:w-auto !mt-12">
+            {(step >= 2 && source !== 'salary' || step >=1 && source === 'salary') && renderSection(3, <Button type="submit" disabled={isCalculating} className="w-full md:w-auto !mt-12">
                 {isCalculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Calculate Impact
             </Button>
@@ -327,29 +332,48 @@ export function TaxClarityForm() {
 
           {results && explanation && !isCalculating && (
             <div className="space-y-12 !mt-12">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+              <div className="space-y-8">
+                {/* Before */}
                 <div>
-                  <p className="text-sm text-muted-foreground">Before 2026</p>
-                  <p className="text-3xl md:text-4xl font-semibold tracking-tight">{formatCurrency(results.taxBefore / periodDivisor)}</p>
+                  <div className="flex justify-between items-baseline mb-2">
+                    <span className="text-base text-muted-foreground">Before 2026 tax paid ({form.getValues('period')}ly)</span>
+                    <span className="text-2xl md:text-3xl font-semibold">{formatCurrency(results.taxBefore / periodDivisor)}</span>
+                  </div>
+                  <div className="bg-muted h-3 rounded-full">
+                    <div className="bg-border h-3 rounded-full" style={{ width: `${beforeTaxWidth}%` }}></div>
+                  </div>
                 </div>
+
+                {/* After */}
                 <div>
-                  <p className="text-sm text-muted-foreground">After 2026</p>
-                  <p className="text-3xl md:text-4xl font-semibold tracking-tight">{formatCurrency(results.taxAfter / periodDivisor)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Difference</p>
-                  <div className="flex items-center justify-center md:justify-start gap-2">
-                    <p className={cn("text-3xl md:text-4xl font-semibold tracking-tight", isIncrease ? "text-destructive" : "text-green-600")}>
-                      {formatCurrency(Math.abs(difference) / periodDivisor)}
-                    </p>
-                    <span className={cn("flex items-center text-lg font-medium", isIncrease ? "text-destructive" : "text-green-600")}>
-                      {isIncrease ? <ArrowUp size={20}/> : <ArrowDown size={20}/>}
-                      {Math.abs(percentageChange).toFixed(0)}%
-                    </span>
+                  <div className="flex justify-between items-baseline mb-2">
+                    <span className="text-base text-muted-foreground">After 2026 tax paid ({form.getValues('period')}ly)</span>
+                    <span className={cn("text-2xl md:text-3xl font-semibold", isIncrease ? "text-destructive" : "text-primary")}>{formatCurrency(results.taxAfter / periodDivisor)}</span>
+                  </div>
+                  <div className="bg-muted h-3 rounded-full">
+                    <div className={cn("h-3 rounded-full", isIncrease ? "bg-destructive" : "bg-primary")} style={{ width: `${afterTaxWidth}%` }}></div>
                   </div>
                 </div>
               </div>
               
+              {/* Difference */}
+              <div className="text-center pt-6 space-y-2">
+                  <p className="text-base text-muted-foreground">Difference</p>
+                  <div className="flex items-center justify-center gap-4">
+                      <p className={cn("text-4xl md:text-5xl font-bold tracking-tight", isIncrease ? "text-destructive" : "text-primary")}>
+                          {isIncrease ? '+' : '-'}{formatCurrency(absDiffAmount)}
+                      </p>
+                      <div className={cn("flex items-center text-xl md:text-2xl font-medium", isIncrease ? "text-destructive" : "text-primary")}>
+                        {isIncrease ? <ArrowUp size={28}/> : <ArrowDown size={28}/>}
+                        <span>{Math.abs(percentageChange).toFixed(0)}%</span>
+                      </div>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                      (You pay {formatCurrency(absDiffAmount)} {isIncrease ? 'more' : 'less'})
+                  </p>
+              </div>
+
+              {/* AI Explanation */}
               <div className="space-y-4">
                 <Prompt>Why the change?</Prompt>
                 <p className="leading-relaxed">{explanation}</p>
