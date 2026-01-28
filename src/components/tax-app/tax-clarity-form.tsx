@@ -19,7 +19,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { calculateTaxes } from "@/lib/tax-calculator";
-import { explainTaxChanges } from "@/ai/flows/explain-tax-changes";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
@@ -51,7 +50,6 @@ const BlinkingCursor = () => (
 export function TaxClarityForm() {
   const [step, setStep] = useState(0);
   const [results, setResults] = useState<{ taxBefore: number; taxAfter: number } | null>(null);
-  const [explanation, setExplanation] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationFeedback, setCalculationFeedback] = useState<string[]>([]);
   
@@ -75,13 +73,11 @@ export function TaxClarityForm() {
       setIsCalculating(true);
       setCalculationFeedback([]);
       setResults(null);
-      setExplanation(null);
 
       const feedbacks = [
         "applying pre-2026 tax rules...",
         "applying new tax laws...",
         "comparing outcomes...",
-        "generating explanation...",
       ];
       
       for (let i = 0; i < feedbacks.length; i++) {
@@ -90,21 +86,6 @@ export function TaxClarityForm() {
       }
 
       const { taxBefore, taxAfter } = calculateTaxes(data);
-      
-      try {
-        const aiResponse = await explainTaxChanges({
-          incomeType: data.source,
-          incomeBefore: data.period === 'monthly' ? (data.income || 0) * 12 : (data.income || 0),
-          incomeAfter: data.period === 'monthly' ? (data.income || 0) * 12 : (data.income || 0),
-          taxBefore,
-          taxAfter,
-          cashPercentage: data.cashPercentage,
-        });
-        setExplanation(aiResponse.explanation);
-      } catch (error) {
-        console.error("AI explanation failed:", error);
-        setExplanation("There was an issue generating a personalized explanation. The change is primarily due to new tax brackets and adjustments to deductible allowances.");
-      }
       
       setResults({ taxBefore, taxAfter });
       setIsCalculating(false);
@@ -318,7 +299,7 @@ export function TaxClarityForm() {
             )}
           </div>
 
-          {(isCalculating || (results && explanation)) && (
+          {(isCalculating || results) && (
             <div className="!mt-16 space-y-2" ref={resultsRef}>
                 {calculationFeedback.map((fb, index) => (
                   <div key={index} className="flex items-center gap-2 text-muted-foreground">
@@ -330,7 +311,7 @@ export function TaxClarityForm() {
             </div>
           )}
 
-          {results && explanation && !isCalculating && (
+          {results && !isCalculating && (
             <div className="space-y-12 !mt-12">
               <div className="space-y-8">
                 {/* Before */}
@@ -373,10 +354,30 @@ export function TaxClarityForm() {
                   </p>
               </div>
 
-              {/* AI Explanation */}
+              {/* Explanation */}
               <div className="space-y-4">
                 <Prompt>Why the change?</Prompt>
-                <p className="leading-relaxed">{explanation}</p>
+                <ul className="space-y-3 text-muted-foreground/90 pl-6">
+                    <li className="flex items-start">
+                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                        <span>Your annual income benefits from the new higher tax-free threshold (₦800,000).</span>
+                    </li>
+                    <li className="flex items-start">
+                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                        <span>
+                            {form.getValues('source') === 'salary'
+                            ? 'As a salaried earner, your income is fully assessed under the new structure, but with revised tax bands.'
+                            : `For business/mixed income, our model considers that the cash portion (${form.getValues('cashPercentage')}%) may influence your final taxable amount differently under the new system.`}
+                        </span>
+                    </li>
+                    <li className="flex items-start">
+                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                        <span>The old system of reliefs combined with rates from 7-24% is being replaced by new progressive bands that change your overall tax.</span>
+                    </li>
+                </ul>
+                <div className="text-xs text-muted-foreground pt-4">
+                  <p><strong>Assumptions:</strong> Simplified federal model; cash income lowers estimated taxable portion for business/mixed; excludes personal deductions, state taxes, VAT.</p>
+                </div>
               </div>
 
               <div className="text-center pt-8">
