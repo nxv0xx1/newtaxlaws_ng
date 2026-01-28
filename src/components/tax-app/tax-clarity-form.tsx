@@ -124,21 +124,14 @@ export function TaxClarityForm() {
   };
 
   const handlePreset = (presetData: PresetData) => {
-    form.reset({
-      ...form.getValues(),
+    const data: FormData = {
       income: presetData.income,
       period: presetData.period,
       source: presetData.source,
       cashPercentage: presetData.cashPercentage ?? form.getValues('cashPercentage'),
-    });
-    setStep(source === 'salary' ? 3 : 2);
-    
-    setTimeout(() => {
-      const submitButton = formContainerRef.current?.querySelector('button[type="submit"]');
-      if (submitButton) {
-        submitButton.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 100);
+    };
+    form.reset(data);
+    onSubmit(data);
   };
 
   const formatCurrency = (amount: number) => {
@@ -174,19 +167,38 @@ export function TaxClarityForm() {
 
   return (
     <div ref={formContainerRef}>
-      <div className="mb-12 space-y-4">
-          <Prompt>Or start with a sample</Prompt>
-          <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => handlePreset({ income: 150000, period: 'monthly', source: 'salary' })}>
-                  Sample: ₦150k/month Salary
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => handlePreset({ income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}>
-                  Sample: ₦2m/year Business
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => handlePreset({ income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}>
-                  Sample: ₦500k/month Mixed
-              </Button>
-          </div>
+      <div className="mb-12 space-y-6">
+        <Prompt>See it in action — try a sample (no typing needed!)</Prompt>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            type="button"
+            onClick={() => handlePreset({ income: 150000, period: 'monthly', source: 'salary' })}
+            className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
+          >
+            <p className="font-medium text-card-foreground">Sample: ₦150k/month Salary</p>
+            <p className="text-sm text-muted-foreground">Preview: See how the new bands affect a salaried earner.</p>
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePreset({ income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}
+            className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
+          >
+            <p className="font-medium text-card-foreground">Sample: ₦2m/year Business</p>
+            <p className="text-sm text-muted-foreground">Preview: Explore how cash income estimates change your tax.</p>
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePreset({ income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}
+            className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
+          >
+            <p className="font-medium text-card-foreground">Sample: ₦500k/month Mixed</p>
+            <p className="text-sm text-muted-foreground">Preview: Understand the impact on combined income sources.</p>
+          </button>
+        </div>
+      </div>
+      
+      <div className="mb-10">
+        <Prompt>Or enter your own income</Prompt>
       </div>
 
       <Form {...form}>
