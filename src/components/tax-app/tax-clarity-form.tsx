@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowDown, ArrowUp, Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,12 +29,14 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+type PresetKey = 'salary' | 'business' | 'mixed';
 type PresetData = {
     income: number;
     period: 'monthly' | 'annually';
-    source: 'salary' | 'business' | 'mixed';
+    source: PresetKey;
     cashPercentage?: number;
 };
+
 
 const Prompt = ({ children }: { children: React.ReactNode }) => (
   <div className="flex items-center gap-2 text-foreground font-code">
@@ -54,9 +56,12 @@ export function TaxClarityForm() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationFeedback, setCalculationFeedback] = useState<string[]>([]);
   const [showReportCTA, setShowReportCTA] = useState(false);
+  const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
   
   const resultsRef = useRef<HTMLDivElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
+  const samplesRef = useRef<HTMLDivElement>(null);
+  const incomeInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -129,7 +134,8 @@ export function TaxClarityForm() {
       advanceStep(advanceFromStep);
   };
 
-  const handlePreset = (presetData: PresetData) => {
+  const handlePreset = (presetKey: PresetKey, presetData: PresetData) => {
+    setActivePreset(presetKey);
     setShowReportCTA(false);
     const data: FormData = {
       income: presetData.income,
@@ -142,9 +148,48 @@ export function TaxClarityForm() {
   };
   
   const onManualSubmit = (data: FormData) => {
+    setActivePreset(null);
     setShowReportCTA(true);
     calculateAndShowResults(data);
   }
+
+  const resetForm = () => {
+    setResults(null);
+    setCalculationFeedback([]);
+    setActivePreset(null);
+    form.reset({
+      income: undefined,
+      period: "monthly",
+      source: "salary",
+      cashPercentage: 20,
+    });
+    setStep(0);
+    if(samplesRef.current) {
+      samplesRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+  
+  const handleTryOwnIncome = () => {
+    const incomeSection = formContainerRef.current?.querySelector('[data-section-id="0"]');
+
+    setResults(null);
+    setCalculationFeedback([]);
+    setActivePreset(null);
+    form.reset({
+        income: undefined,
+        period: "monthly",
+        source: "salary",
+        cashPercentage: 20,
+    });
+    setStep(0);
+
+    if (incomeSection) {
+        incomeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            incomeInputRef.current?.focus();
+        }, 300); // Delay focus to allow for scroll
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return `₦${new Intl.NumberFormat("en-NG", {
@@ -215,29 +260,32 @@ export function TaxClarityForm() {
 
   return (
     <div ref={formContainerRef}>
-      <div className="mb-12 space-y-6">
+      <div ref={samplesRef} className="mb-12 space-y-6">
         <Prompt>Try a sample calculation (no typing needed!)</Prompt>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             type="button"
-            onClick={() => handlePreset({ income: 150000, period: 'monthly', source: 'salary' })}
-            className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
+            onClick={() => handlePreset('salary', { income: 150000, period: 'monthly', source: 'salary' })}
+            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-primary/5 hover:border-primary"
+            data-active={activePreset === 'salary'}
           >
             <p className="font-medium text-card-foreground">Example: ₦150k monthly salary</p>
             <p className="text-sm text-muted-foreground">See what happens to a regular salaried worker.</p>
           </button>
           <button
             type="button"
-            onClick={() => handlePreset({ income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}
-            className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
+            onClick={() => handlePreset('business', { income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}
+            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-primary/5 hover:border-primary"
+            data-active={activePreset === 'business'}
           >
             <p className="font-medium text-card-foreground">Example: ₦2m yearly from a business</p>
             <p className="text-sm text-muted-foreground">See how business income (especially cash payments) changes your tax.</p>
           </button>
           <button
             type="button"
-            onClick={() => handlePreset({ income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}
-            className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
+            onClick={() => handlePreset('mixed', { income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}
+            className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-primary/5 hover:border-primary"
+            data-active={activePreset === 'mixed'}
           >
             <p className="font-medium text-card-foreground">Example: ₦500k monthly from different sources</p>
             <p className="text-sm text-muted-foreground">See what happens with mixed salary + business or side hustle income.</p>
@@ -267,7 +315,7 @@ export function TaxClarityForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input type="number" placeholder="e.g., 150000" className="h-14 text-lg" {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
+                            <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className="h-14 text-lg" {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -389,7 +437,14 @@ export function TaxClarityForm() {
           )}
 
           {results && !isCalculating && (
-            <div className="space-y-12 !mt-12">
+            <div className="relative space-y-12 !mt-12">
+              {activePreset && (
+                  <Button variant="ghost" size="icon" onClick={resetForm} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
+                      <X className="h-5 w-5" />
+                      <span className="sr-only">Clear results</span>
+                  </Button>
+              )}
+
               <div className="space-y-8">
                 {/* Before */}
                 <div>
@@ -444,6 +499,15 @@ export function TaxClarityForm() {
                   <p>Quick estimate using federal rules from the Nigeria Tax Act 2025 (starts 2026). Not official advice — things like deductions or state taxes not included here.</p>
                 </div>
               </div>
+
+              {activePreset && (
+                <div className="!mt-12 text-center">
+                    <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
+                        Try with my own income
+                        <ArrowRight className="ml-2" />
+                    </Button>
+                </div>
+              )}
 
               {/* CTA for detailed report */}
               {showReportCTA && (
