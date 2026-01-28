@@ -24,9 +24,9 @@ export default function Home() {
                 <div className="font-code text-muted-foreground">
                     <span className="text-primary">{'>'}</span> Want the full official text?
                 </div>
-                <a href="https://www.premiumtimesng.com/news/top-news/847380-download-certified-true-copies-of-nigerias-new-tax-laws.html" target="_blank" rel="noopener noreferrer" className="inline-block">
+                <a href="https://www.thecable.ng/wp-content/uploads/2026/01/Final-Approved-Copy-for-Print-NIGERIA-TAX-ACT-2025.pdf" target="_blank" rel="noopener noreferrer" className="inline-block">
                     <Button className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
-                        Download Tax Laws PDFs
+                        Download New Tax Laws (PDF)
                         <ArrowRight className="ml-2" />
                     </Button>
                 </a>
