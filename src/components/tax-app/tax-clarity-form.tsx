@@ -53,6 +53,7 @@ export function TaxClarityForm() {
   const [results, setResults] = useState<{ taxBefore: number; taxAfter: number } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationFeedback, setCalculationFeedback] = useState<string[]>([]);
+  const [showReportCTA, setShowReportCTA] = useState(false);
   
   const resultsRef = useRef<HTMLDivElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
@@ -74,7 +75,7 @@ export function TaxClarityForm() {
     setIsClient(true);
   }, []);
 
-  const onSubmit = async (data: FormData) => {
+  const calculateAndShowResults = async (data: FormData) => {
       setIsCalculating(true);
       setCalculationFeedback([]);
       setResults(null);
@@ -129,6 +130,7 @@ export function TaxClarityForm() {
   };
 
   const handlePreset = (presetData: PresetData) => {
+    setShowReportCTA(false);
     const data: FormData = {
       income: presetData.income,
       period: presetData.period,
@@ -136,8 +138,13 @@ export function TaxClarityForm() {
       cashPercentage: presetData.cashPercentage ?? form.getValues('cashPercentage'),
     };
     form.reset(data);
-    onSubmit(data);
+    calculateAndShowResults(data);
   };
+  
+  const onManualSubmit = (data: FormData) => {
+    setShowReportCTA(true);
+    calculateAndShowResults(data);
+  }
 
   const formatCurrency = (amount: number) => {
     return `₦${new Intl.NumberFormat("en-NG", {
@@ -248,7 +255,7 @@ export function TaxClarityForm() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-6">
           <div className={cn("space-y-10 transition-opacity duration-500", (isCalculating || results) ? 'opacity-50' : 'opacity-100')}>
             {renderSection(0, 
               <div className="space-y-4">
@@ -439,48 +446,50 @@ export function TaxClarityForm() {
               </div>
 
               {/* CTA for detailed report */}
-              <div className="!mt-20 md:!mt-24 text-center">
-                <div className="inline-block">
-                  <Prompt>Want the full story for your situation?</Prompt>
+              {showReportCTA && (
+                <div className="!mt-20 md:!mt-24 text-center">
+                  <div className="inline-block">
+                    <Prompt>Want the full story for your situation?</Prompt>
+                  </div>
+                  
+                  <h3 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+                    Get your detailed personal report — ₦500
+                  </h3>
+                  
+                  <div className="mt-6 max-w-sm mx-auto text-left">
+                    <ul className="space-y-2 text-muted-foreground/90">
+                        <li className="flex items-start">
+                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                            <span>Step-by-step before vs after calculation</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                            <span>All assumptions explained</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                            <span>Simple chart of your tax bands</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                            <span>Downloadable PDF</span>
+                        </li>
+                    </ul>
+                  </div>
+                  
+                  <div className="mt-8">
+                    <Button 
+                      type="button" 
+                      size="lg" 
+                      onClick={() => console.log("Get My Report clicked")}
+                      className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
+                    >
+                      Get My Report
+                      <ArrowRight className="ml-2" />
+                    </Button>
+                  </div>
                 </div>
-                
-                <h3 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
-                  Get your detailed personal report — ₦500
-                </h3>
-                
-                <div className="mt-6 max-w-sm mx-auto text-left">
-                  <ul className="space-y-2 text-muted-foreground/90">
-                      <li className="flex items-start">
-                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                          <span>Step-by-step before vs after calculation</span>
-                      </li>
-                      <li className="flex items-start">
-                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                          <span>All assumptions explained</span>
-                      </li>
-                      <li className="flex items-start">
-                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                          <span>Simple chart of your tax bands</span>
-                      </li>
-                      <li className="flex items-start">
-                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                          <span>Downloadable PDF</span>
-                      </li>
-                  </ul>
-                </div>
-                
-                <div className="mt-8">
-                  <Button 
-                    type="button" 
-                    size="lg" 
-                    onClick={() => console.log("Get My Report clicked")}
-                    className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
-                  >
-                    Get My Report
-                    <ArrowRight className="ml-2" />
-                  </Button>
-                </div>
-              </div>
+              )}
             </div>
           )}
         </form>
