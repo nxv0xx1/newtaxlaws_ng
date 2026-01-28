@@ -14,6 +14,21 @@ export default function Home() {
           <p className="mt-4 text-lg text-muted-foreground">
             See how the new 2026 tax laws affect your money.
           </p>
+
+          <div className="mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-muted text-muted-foreground text-[10px] font-bold ring-1 ring-inset ring-border">1</span>
+              <span>See what's new in 2026</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-muted text-muted-foreground text-[10px] font-bold ring-1 ring-inset ring-border">2</span>
+              <span>Try a sample (fastest way)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-muted text-muted-foreground text-[10px] font-bold ring-1 ring-inset ring-border">3</span>
+              <span>Enter your own numbers → see your result</span>
+            </div>
+          </div>
           
           <div className="mt-8 space-y-6 text-left">
             <p className="leading-relaxed text-muted-foreground/90">
