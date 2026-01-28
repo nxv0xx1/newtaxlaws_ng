@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { calculateTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
+import { calculateTaxes, calculateOldTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -94,6 +95,7 @@ export function TaxClarityForm() {
   const [emailForReport, setEmailForReport] = useState("");
   const [isPaying, setIsPaying] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
   
   const resultsRef = useRef<HTMLDivElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
@@ -126,7 +128,6 @@ export function TaxClarityForm() {
       form.setValue('cashPercentage', 0);
     } else if (source === 'business') {
       form.setValue('businessIncomePercentage', 100);
-      // Don't reset if already being adjusted
       if (form.getValues('cashPercentage') === 0) {
         form.setValue('cashPercentage', 50);
       }
@@ -205,7 +206,7 @@ export function TaxClarityForm() {
     calculateAndShowResults(data);
   }
 
-  const resetForm = (scrollToSamples = true) => {
+  const resetForm = (scrollToTop = true) => {
     setResults(null);
     setCalculationFeedback([]);
     setActivePreset(null);
@@ -217,22 +218,21 @@ export function TaxClarityForm() {
       cashPercentage: 0,
       businessIncomePercentage: 50,
     });
-     if(scrollToSamples && samplesRef.current) {
-      samplesRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+     if(scrollToTop && formContainerRef.current) {
+      formContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
   
   const handleTryOwnIncome = () => {
     resetForm(false);
-
     if (incomeContainerRef.current) {
         incomeContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => {
-            incomeInputRef.current?.focus();
-            setIsInputGlowing(true);
-            setTimeout(() => {
-              setIsInputGlowing(false);
-            }, 2000);
+            if(incomeInputRef.current) {
+              incomeInputRef.current.focus();
+              setIsInputGlowing(true);
+              setTimeout(() => setIsInputGlowing(false), 2000);
+            }
         }, 300);
     }
   };
@@ -250,7 +250,7 @@ export function TaxClarityForm() {
     setIsPaying(true);
 
     const handler = window.PaystackPop.setup({
-      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_e70a8d38ceee46020aa8b8bde30272ab071bae55',
       email: emailForReport,
       amount: 50000, // ₦500 in kobo
       onClose: () => {
@@ -271,19 +271,42 @@ export function TaxClarityForm() {
         if (verificationResult.status === 'success') {
             toast({
                 title: "Payment Successful!",
-                description: `Your detailed report will be sent to ${verificationResult.data?.email}. Ref: ${response.reference}`,
-                duration: 10000,
+                description: "Redirecting you to the download page...",
+                duration: 5000,
             });
+
+            const formData = form.getValues();
+            const newTaxResults = results; // Already calculated for display
+            const oldTaxResults = calculateOldTaxes(formData);
+
+            const reportData = {
+                formData,
+                newTaxResults,
+                oldTaxResults,
+            };
+
+            try {
+                sessionStorage.setItem('reportData', JSON.stringify(reportData));
+                router.push(`/download?ref=${response.reference}`);
+            } catch (e) {
+                console.error("Could not set session storage or redirect", e);
+                toast({
+                    variant: "destructive",
+                    title: "Failed to prepare report",
+                    description: "There was an error preparing your report data. Please contact support.",
+                });
+            }
+
         } else {
             toast({
                 variant: "destructive",
                 title: "Payment Verification Failed",
                 description: verificationResult.message || "Please contact support.",
             });
+            setIsPaying(false);
         }
         setIsPaymentDialogOpen(false);
-        setIsPaying(false);
-        setEmailForReport("");
+        // Don't reset isPaying state here on success, as page will redirect
       },
     });
     handler.openIframe();
@@ -324,7 +347,7 @@ export function TaxClarityForm() {
             data-active={activePreset === 'business'}
           >
             <p className="font-medium text-card-foreground">Example: ₦2m yearly from a business</p>
-            <p className="text-sm text-muted-foreground">See how business income (especially cash payments) changes your tax.</p>
+            <p className="text-sm text-muted-foreground">See how business income changes your tax.</p>
           </button>
           <button
             type="button"
@@ -333,7 +356,7 @@ export function TaxClarityForm() {
             data-active={activePreset === 'mixed'}
           >
             <p className="font-medium text-card-foreground">Example: ₦500k monthly from different sources</p>
-            <p className="text-sm text-muted-foreground">See what happens with mixed salary + business or side hustle income.</p>
+            <p className="text-sm text-muted-foreground">See what happens with mixed income.</p>
           </button>
         </div>
       </div>
@@ -359,7 +382,7 @@ export function TaxClarityForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className={cn("h-14 text-lg", isInputGlowing && "highlight-glow")} {...field} value={field.value ?? ""} />
+                          <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className={cn("h-14 text-lg", isInputGlowing && "highlight-glow")} {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -558,12 +581,12 @@ export function TaxClarityForm() {
               </div>
 
               <div>
-                  <p className="text-xs text-center text-muted-foreground mb-2">Your annual income by tax band</p>
+                  <p className="text-xs text-center text-muted-foreground mb-2">Your annual taxable income by tax band</p>
                   <div className="flex h-3 w-full rounded-full overflow-hidden bg-muted">
                       {results.breakdown.map((item, index) => {
                           const colors = ["bg-primary/20", "bg-primary/40", "bg-primary/60", "bg-primary/80", "bg-primary"];
                           if (item.taxable <= 0) return null;
-                          const widthPercent = (item.taxable / results.annualIncome) * 100;
+                          const widthPercent = (item.taxable / results.taxableIncome) * 100;
                           return (
                               <div
                                   key={index}
@@ -576,7 +599,7 @@ export function TaxClarityForm() {
                   </div>
                    <div className="flex justify-between text-xs font-code text-muted-foreground mt-1 px-1">
                       <span>₦0</span>
-                      <span>{formatCurrency(results.annualIncome)}</span>
+                      <span>{formatCurrency(results.taxableIncome)}</span>
                   </div>
               </div>
 
@@ -608,7 +631,7 @@ export function TaxClarityForm() {
                 <ul className="space-y-3 text-muted-foreground/90 pl-6">
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>The biggest change: the first ₦800,000 of your annual income is now 100% tax-free.</span>
+                        <span>The biggest change: the first ₦800,000 of your annual taxable income is now 100% tax-free.</span>
                     </li>
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
@@ -626,7 +649,7 @@ export function TaxClarityForm() {
               {activePreset && (
                 <div className="!mt-12 text-center space-y-3">
                   <p className="text-muted-foreground">
-                    This is an example. Want to see exactly what you'll pay with your real income?
+                    This is an example. Want to see what you'll pay with your real income?
                   </p>
                   <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
                       Try with my own income
