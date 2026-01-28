@@ -30,6 +30,12 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+type PresetData = {
+    income: number;
+    period: 'monthly' | 'annually';
+    source: 'salary' | 'business' | 'mixed';
+    cashPercentage?: number;
+};
 
 const Prompt = ({ children }: { children: React.ReactNode }) => (
   <div className="flex items-center gap-2 text-foreground">
@@ -62,6 +68,8 @@ export function TaxClarityForm() {
     },
     mode: "onBlur",
   });
+
+  const source = form.watch("source");
 
   const onSubmit = async (data: FormData) => {
       setIsCalculating(true);
@@ -134,6 +142,24 @@ export function TaxClarityForm() {
       advanceStep(advanceFromStep);
   };
 
+  const handlePreset = (presetData: PresetData) => {
+    form.reset({
+      ...form.getValues(),
+      income: presetData.income,
+      period: presetData.period,
+      source: presetData.source,
+      cashPercentage: presetData.cashPercentage ?? form.getValues('cashPercentage'),
+    });
+    setStep(4);
+    
+    setTimeout(() => {
+      const submitButton = formContainerRef.current?.querySelector('button[type="submit"]');
+      if (submitButton) {
+        submitButton.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
+  };
+
   const formatCurrency = (amount: number) => {
     return `₦${new Intl.NumberFormat("en-NG", {
       minimumFractionDigits: 0,
@@ -161,6 +187,21 @@ export function TaxClarityForm() {
 
   return (
     <div ref={formContainerRef}>
+      <div className="mb-12 space-y-4">
+          <Prompt>Or start with a sample</Prompt>
+          <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => handlePreset({ income: 150000, period: 'monthly', source: 'salary' })}>
+                  Sample: ₦150k/month Salary
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => handlePreset({ income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}>
+                  Sample: ₦2m/year Business
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => handlePreset({ income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}>
+                  Sample: ₦500k/month Mixed
+              </Button>
+          </div>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className={cn("space-y-10 transition-opacity duration-500", (isCalculating || results) ? 'opacity-50' : 'opacity-100')}>
@@ -201,19 +242,32 @@ export function TaxClarityForm() {
                       )}
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground pt-1">Monthly or annual? We convert automatically.</p>
               </div>
             )}
 
             {renderSection(1, 
               <div className="space-y-4">
                 <Prompt>Select income source</Prompt>
+                 <p className="text-xs text-muted-foreground -mt-2">Salary: fully traceable | Business/mixed: estimate cash portion below.</p>
                 <FormField
                   control={form.control}
                   name="source"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <RadioGroup onValueChange={(v) => handleRadioChange(field, v, 1)} defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <RadioGroup 
+                          onValueChange={(v: "salary" | "business" | "mixed") => {
+                            field.onChange(v);
+                            if (step === 1) {
+                              if (v === 'salary') {
+                                setStep(3);
+                              } else {
+                                setStep(2);
+                              }
+                            }
+                          }}
+                          defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           {['salary', 'business', 'mixed'].map(source => (
                             <FormItem key={source}>
                               <FormControl><RadioGroupItem value={source} className="sr-only peer" /></FormControl>
@@ -230,9 +284,10 @@ export function TaxClarityForm() {
               </div>
             )}
 
-            {renderSection(2,
+            {source !== 'salary' && renderSection(2,
               <div className="space-y-4">
                 <Prompt>Estimate cash income ({form.watch('cashPercentage')}%)</Prompt>
+                 <p className="text-xs text-muted-foreground -mt-2">Estimate % received as cash/untraced (common for business/mixed; lowers taxable estimate in tool).</p>
                 <FormField
                   control={form.control}
                   name="cashPercentage"
