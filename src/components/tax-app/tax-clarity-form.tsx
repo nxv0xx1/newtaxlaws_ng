@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { calculateTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
+import { calculateTaxes, calculateOldTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -248,6 +248,21 @@ export function TaxClarityForm() {
     
     setIsPaying(true);
 
+    if (!results) {
+        toast({ variant: "destructive", title: "Error", description: "Calculation data is missing."});
+        setIsPaying(false);
+        return;
+    }
+
+    const formData = form.getValues();
+    const oldTaxResults = calculateOldTaxes(formData);
+
+    const reportData = {
+        formData,
+        newTaxResults: results,
+        oldTaxResults,
+    };
+
     const handler = window.PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_e70a8d38ceee46020aa8b8bde30272ab071bae55',
       email: emailForReport,
@@ -264,19 +279,6 @@ export function TaxClarityForm() {
             title: "Verifying Payment...",
             description: "Please wait while we confirm your payment.",
         });
-
-        if (!results) {
-            toast({ variant: "destructive", title: "Error", description: "Calculation data is missing."});
-            setIsPaying(false);
-            return;
-        }
-
-        const formData = form.getValues();
-
-        const reportData = {
-            formData,
-            newTaxResults: results,
-        };
 
         try {
             sessionStorage.setItem('reportData', JSON.stringify(reportData));

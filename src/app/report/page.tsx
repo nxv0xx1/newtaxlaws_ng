@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ReportData {
     formData: TaxInput;
     newTaxResults: TaxCalculationResult;
+    oldTaxResults: TaxCalculationResult;
 }
 
 function ReportPageContent() {
@@ -37,7 +38,13 @@ function ReportPageContent() {
                     setStatus('error');
                     return;
                 }
-                setReportData(JSON.parse(data));
+                const parsedData = JSON.parse(data);
+                if (!parsedData.oldTaxResults) {
+                    setError("Report comparison data is missing. Please recalculate your taxes.");
+                    setStatus('error');
+                    return;
+                }
+                setReportData(parsedData);
             } catch (e) {
                 console.error("Failed to parse report data from session storage", e);
                 setError("There was an error retrieving your report data.");
