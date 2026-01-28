@@ -509,7 +509,7 @@ export function TaxClarityForm() {
               </div>
             )}
             
-            <Button type="submit" size="lg" disabled={isCalculating} className="w-full !mt-12">
+            <Button type="submit" size="lg" disabled={isCalculating} className="w-full !mt-12 h-14">
                 {isCalculating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

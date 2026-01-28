@@ -21,17 +21,17 @@ export default function Home() {
   
   return (
     <main className="min-h-screen font-body bg-background text-foreground">
-      <div className="container mx-auto max-w-2xl px-4 py-16 sm:py-24">
-        <header className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-black tracking-tight">
+      <div className="container mx-auto max-w-2xl px-4 pb-16 sm:pb-24">
+        <header className="text-center mb-12 pt-5 md:pt-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-black tracking-tight mb-3">
             newtaxlaws_ng
             <span className="text-primary">.</span>
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-muted-foreground max-w-[90%] mx-auto">
             See how the new 2026 tax laws affect your money.
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+          <div className="mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-sm text-muted-foreground max-w-[90%] mx-auto">
             <div className="flex items-center gap-2">
               <span className="flex items-center justify-center h-4 w-4 rounded-full bg-muted text-muted-foreground text-[10px] font-bold ring-1 ring-inset ring-border">1</span>
               <span>See what's new in 2026</span>
@@ -68,10 +68,10 @@ export default function Home() {
         <div className="mb-12 space-y-6">
           {isMounted ? (
             <Tabs defaultValue="individuals" className="w-full">
-              <TabsList className="grid w-full grid-cols-1 h-auto gap-2 md:grid-cols-3">
-                <TabsTrigger value="individuals" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">People & Workers</TabsTrigger>
-                <TabsTrigger value="small-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
-                <TabsTrigger value="large-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-1 h-auto gap-3 md:grid-cols-3">
+                <TabsTrigger value="individuals" className="py-4 text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">People & Workers</TabsTrigger>
+                <TabsTrigger value="small-business" className="py-4 text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
+                <TabsTrigger value="large-business" className="py-4 text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
               </TabsList>
               
               <TabsContent value="individuals" className="mt-6">
@@ -140,7 +140,7 @@ export default function Home() {
                 <ul className="space-y-4 text-muted-foreground/90 pl-2">
                   <li className="flex items-start">
                       <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Companies with turnover over ₦100 million pay 30% tax on profits.</span>
+                      <span>Companies with turnover over ₦100 million pay 30% on profits.</span>
                   </li>
                   <li className="flex items-start">
                       <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>

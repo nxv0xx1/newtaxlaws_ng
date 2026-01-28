@@ -79,7 +79,8 @@
     @apply border-border;
   }
   html, body {
-    @apply w-full overflow-x-hidden;
+    @apply w-full overflow-x-hidden m-0 p-0;
+    box-sizing: border-box;
   }
   body {
     @apply bg-background text-foreground;
