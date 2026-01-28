@@ -37,9 +37,9 @@ type PresetData = {
 };
 
 const Prompt = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center gap-2 text-foreground">
+  <div className="flex items-center gap-2 text-foreground font-code">
     <span className="text-primary">{">"}</span>
-    <span className="font-medium">{children}</span>
+    <span>{children}</span>
   </div>
 );
 
@@ -338,7 +338,7 @@ export function TaxClarityForm() {
               </div>
               
               {/* Difference */}
-              <div className="text-center pt-6 space-y-2">
+              <div className={cn("text-center space-y-2 rounded-lg p-4", isIncrease ? "bg-increase-background" : "bg-saving-background")}>
                   <p className="text-base text-muted-foreground">Difference</p>
                   <div className="flex items-center justify-center gap-4">
                       <p className={cn("text-4xl md:text-5xl font-bold tracking-tight", isIncrease ? "text-destructive" : "text-primary")}>

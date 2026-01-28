@@ -65,6 +65,10 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        'saving-background': '#F0FFF4',
+        'increase-background': '#FFF4F0',
+        'black': '#000000',
+        'white': '#ffffff',
       },
       borderRadius: {
         lg: 'var(--radius)',

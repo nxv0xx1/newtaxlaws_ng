@@ -7,7 +7,7 @@ export default function Home() {
     <main className="min-h-screen font-body bg-background text-foreground">
       <div className="container mx-auto max-w-2xl px-4 py-16 sm:py-24">
         <header className="text-left mb-12">
-          <h1 className="font-headline text-2xl font-medium">
+          <h1 className="font-headline text-2xl font-medium text-black">
             newtaxlaws_ng
             <span style={{ color: 'hsl(var(--primary))' }}>.</span>
           </h1>
