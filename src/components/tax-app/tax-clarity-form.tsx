@@ -26,6 +26,7 @@ const formSchema = z.object({
   period: z.enum(["monthly", "annually"]),
   source: z.enum(["salary", "business", "mixed"]),
   cashPercentage: z.number().min(0).max(100),
+  businessIncomePercentage: z.number().min(0).max(100),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -35,6 +36,7 @@ type PresetData = {
     period: 'monthly' | 'annually';
     source: PresetKey;
     cashPercentage?: number;
+    businessIncomePercentage?: number;
 };
 
 
@@ -69,7 +71,8 @@ export function TaxClarityForm() {
       income: undefined,
       period: "monthly",
       source: "salary",
-      cashPercentage: 20,
+      cashPercentage: 0,
+      businessIncomePercentage: 50,
     },
     mode: "onBlur",
   });
@@ -115,7 +118,7 @@ export function TaxClarityForm() {
   };
   
   useEffect(() => {
-    if (step > 0) {
+    if (step > 0 && step < 10) { // Don't scroll for final submit step
       const nextSection = formContainerRef.current?.querySelector(`[data-section-id="${step}"]`);
       if (nextSection) {
         nextSection.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
@@ -129,9 +132,20 @@ export function TaxClarityForm() {
     });
   };
   
-  const handleRadioChange = (field: any, value: any, advanceFromStep: number) => {
-      field.onChange(value);
-      advanceStep(advanceFromStep);
+  const handleSourceChange = (value: "salary" | "business" | "mixed") => {
+      form.setValue('source', value);
+      if (value === 'salary') {
+        form.setValue('cashPercentage', 0);
+        setStep(10); // Skip to submit
+      } else {
+        if (value === 'business') {
+          form.setValue('cashPercentage', 50);
+        } else { // mixed
+          form.setValue('businessIncomePercentage', 50);
+          form.setValue('cashPercentage', 40);
+        }
+        advanceStep(1);
+      }
   };
 
   const handlePreset = (presetKey: PresetKey, presetData: PresetData) => {
@@ -141,7 +155,8 @@ export function TaxClarityForm() {
       income: presetData.income,
       period: presetData.period,
       source: presetData.source,
-      cashPercentage: presetData.cashPercentage ?? form.getValues('cashPercentage'),
+      cashPercentage: presetData.cashPercentage ?? 0,
+      businessIncomePercentage: presetData.businessIncomePercentage ?? 50,
     };
     form.reset(data);
     calculateAndShowResults(data);
@@ -161,7 +176,8 @@ export function TaxClarityForm() {
       income: undefined,
       period: "monthly",
       source: "salary",
-      cashPercentage: 20,
+      cashPercentage: 0,
+      businessIncomePercentage: 50,
     });
     setStep(0);
     if(samplesRef.current) {
@@ -179,7 +195,8 @@ export function TaxClarityForm() {
         income: undefined,
         period: "monthly",
         source: "salary",
-        cashPercentage: 20,
+        cashPercentage: 0,
+        businessIncomePercentage: 50,
     });
     setStep(0);
 
@@ -201,12 +218,12 @@ export function TaxClarityForm() {
   const periodDivisor = form.getValues('period') === 'monthly' ? 12 : 1;
   const periodName = form.getValues('period');
 
-  const renderSection = (s: number, children: React.ReactNode) => (
+  const renderSection = (s: number, children: React.ReactNode, isVisible: boolean = true) => (
     <div
       data-section-id={s}
       className={cn(
         "transition-opacity duration-700 ease-in-out",
-        step < s && "opacity-0 h-0 overflow-hidden pointer-events-none",
+        (!isVisible || step < s) && "opacity-0 h-0 overflow-hidden pointer-events-none",
         s > 0 && "mt-10"
       )}
     >
@@ -234,7 +251,7 @@ export function TaxClarityForm() {
           </button>
           <button
             type="button"
-            onClick={() => handlePreset('business', { income: 2000000, period: 'annually', source: 'business', cashPercentage: 40 })}
+            onClick={() => handlePreset('business', { income: 2000000, period: 'annually', source: 'business', cashPercentage: 50 })}
             className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'business'}
           >
@@ -243,7 +260,7 @@ export function TaxClarityForm() {
           </button>
           <button
             type="button"
-            onClick={() => handlePreset('mixed', { income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 25 })}
+            onClick={() => handlePreset('mixed', { income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 40, businessIncomePercentage: 50 })}
             className="w-full text-left p-4 border-2 border-transparent rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
             data-active={activePreset === 'mixed'}
           >
@@ -287,7 +304,7 @@ export function TaxClarityForm() {
                       render={({ field }) => (
                         <FormItem className="pt-1">
                           <FormControl>
-                            <RadioGroup onValueChange={(v) => handleRadioChange(field, v, 0)} defaultValue={field.value} className="flex items-center space-x-6">
+                            <RadioGroup onValueChange={(v) => { field.onChange(v); advanceStep(0) }} defaultValue={field.value} className="flex items-center space-x-6">
                               <FormItem className="flex items-center space-x-2 space-y-0">
                                 <FormControl><RadioGroupItem value="monthly" /></FormControl>
                                 <Label className="font-normal cursor-pointer">Monthly</Label>
@@ -309,7 +326,6 @@ export function TaxClarityForm() {
             {renderSection(1, 
               <div className="space-y-4">
                 <Prompt>Where does your money come from?</Prompt>
-                 <p className="text-xs text-muted-foreground -mt-2">Salary is easy to track. For business/mixed income, we'll help you guess the cash part below.</p>
                 <FormField
                   control={form.control}
                   name="source"
@@ -317,17 +333,8 @@ export function TaxClarityForm() {
                     <FormItem>
                       <FormControl>
                         <RadioGroup 
-                          onValueChange={(v: "salary" | "business" | "mixed") => {
-                            field.onChange(v);
-                            if (v === 'salary') {
-                              advanceStep(1);
-                              setStep(3);
-                            } else {
-                              advanceStep(1);
-                            }
-                          }}
+                          onValueChange={(v: "salary" | "business" | "mixed") => handleSourceChange(v)}
                           defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          
                             <FormItem>
                               <FormControl><RadioGroupItem value='salary' className="sr-only peer" /></FormControl>
                               <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
@@ -346,7 +353,6 @@ export function TaxClarityForm() {
                                 A mix of both
                               </Label>
                             </FormItem>
-                          
                         </RadioGroup>
                       </FormControl>
                     </FormItem>
@@ -354,18 +360,61 @@ export function TaxClarityForm() {
                 />
               </div>
             )}
+            
+            {renderSection(2, (
+                <div className="space-y-4">
+                  <Prompt>What's the mix? ({form.watch('businessIncomePercentage')}%)</Prompt>
+                  <p className="text-xs text-muted-foreground -mt-2">Drag the slider to show how your income is split between salary and business.</p>
+                  <FormField
+                    control={form.control}
+                    name="businessIncomePercentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Slider
+                            value={[field.value || 50]}
+                            max={100}
+                            step={5}
+                            onValueChange={value => field.onChange(value[0])}
+                            onValueCommit={() => advanceStep(2)}
+                          />
+                        </FormControl>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Mostly Salary</span>
+                          <span>Mostly Business</span>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+            ), source === 'mixed')}
 
-            {source !== 'salary' && renderSection(2,
+            {renderSection(source === 'mixed' ? 3 : 2, (
               <div className="space-y-4">
-                <Prompt>How much of your pay is cash? ({form.watch('cashPercentage')}%)</Prompt>
-                 <p className="text-xs text-muted-foreground -mt-2">Many business owners receive some money in cash. We make a simple guess on how much the tax office might not see — this can lower the tax estimate a bit.</p>
+                <Prompt>
+                  {source === 'business'
+                    ? `Estimate % received as cash (${form.watch('cashPercentage')}%)`
+                    : `Of the business part, what % is cash? (${form.watch('cashPercentage')}%)`}
+                </Prompt>
+                 <p className="text-xs text-muted-foreground -mt-2">
+                   {source === 'business' 
+                     ? "Common for business owners. We make a simple guess on how this affects your tax."
+                     : "Estimate the cash portion of your side hustle. This can affect the tax estimate."
+                   }
+                 </p>
                 <FormField
                   control={form.control}
                   name="cashPercentage"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Slider defaultValue={[field.value]} max={100} step={5} onValueChange={value => field.onChange(value[0])} onValueCommit={() => advanceStep(2)} />
+                        <Slider 
+                          value={[field.value]} 
+                          max={100} 
+                          step={5} 
+                          onValueChange={value => field.onChange(value[0])} 
+                          onValueCommit={() => setStep(10)} 
+                        />
                       </FormControl>
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>Almost No Cash</span>
@@ -375,9 +424,9 @@ export function TaxClarityForm() {
                   )}
                 />
               </div>
-            )}
+            ), source !== 'salary')}
             
-            {(step >= 2 && source !== 'salary' || step >=1 && source === 'salary') && renderSection(3, <Button type="submit" disabled={isCalculating} className="w-full md:w-auto !mt-12">
+            {renderSection(10, <Button type="submit" disabled={isCalculating} className="w-full md:w-auto !mt-12">
                 {isCalculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 See My Tax Change
             </Button>

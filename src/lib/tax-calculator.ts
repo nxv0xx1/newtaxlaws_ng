@@ -3,6 +3,7 @@ export interface TaxInput {
   period: 'monthly' | 'annually';
   source: 'salary' | 'business' | 'mixed';
   cashPercentage: number;
+  businessIncomePercentage?: number;
 }
 
 export interface TaxBreakdown {
@@ -33,12 +34,22 @@ export function calculateTaxes(input: TaxInput): TaxCalculationResult {
   const annualIncome = input.period === 'monthly' ? input.income * 12 : input.income;
 
   let taxableIncome = annualIncome;
-  // This is a gross simplification to create a difference for business income.
-  if (input.source === 'business' || input.source === 'mixed') {
+  
+  if (input.source === 'business') {
     const cashPortion = annualIncome * (input.cashPercentage / 100);
     const nonCashPortion = annualIncome - cashPortion;
     // Assume only a fraction of cash income is effectively taxed.
-    taxableIncome = nonCashPortion + cashPortion * 0.5; 
+    taxableIncome = nonCashPortion + cashPortion * 0.5;
+  } else if (input.source === 'mixed' && input.businessIncomePercentage !== undefined) {
+    const businessIncome = annualIncome * (input.businessIncomePercentage / 100);
+    const salaryIncome = annualIncome - businessIncome;
+
+    const cashPortionOfBusiness = businessIncome * (input.cashPercentage / 100);
+    const nonCashPortionOfBusiness = businessIncome - cashPortionOfBusiness;
+    
+    const taxableBusinessIncome = nonCashPortionOfBusiness + cashPortionOfBusiness * 0.5;
+      
+    taxableIncome = salaryIncome + taxableBusinessIncome;
   }
   
   if (taxableIncome <= 0) {
