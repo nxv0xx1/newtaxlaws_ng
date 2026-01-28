@@ -443,9 +443,15 @@ export function TaxClarityForm() {
               </div>
             ), source !== 'salary')}
             
-            {renderSection(10, <Button type="submit" disabled={isCalculating} className="w-full md:w-auto !mt-12">
-                {isCalculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                See My Tax Change
+            {renderSection(10, <Button type="submit" size="lg" disabled={isCalculating} className="w-full !mt-12">
+                {isCalculating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Calculating...
+                  </>
+                ) : (
+                  "Calculate My Tax"
+                )}
             </Button>
             )}
           </div>
