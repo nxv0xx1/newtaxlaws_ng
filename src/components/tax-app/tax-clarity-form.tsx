@@ -85,6 +85,19 @@ export function TaxClarityForm() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  useEffect(() => {
+    if (source === 'salary') {
+      form.setValue('businessIncomePercentage', 0);
+      form.setValue('cashPercentage', 0);
+    } else if (source === 'business') {
+      form.setValue('businessIncomePercentage', 100);
+      form.setValue('cashPercentage', 50);
+    } else if (source === 'mixed') {
+      form.setValue('businessIncomePercentage', 50);
+      form.setValue('cashPercentage', 40);
+    }
+  }, [source, form.setValue]);
 
   useEffect(() => {
     if (results && !isCalculating) {
@@ -130,21 +143,6 @@ export function TaxClarityForm() {
       resultsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [results]);
-  
-  const handleSourceChange = (value: "salary" | "business" | "mixed") => {
-      form.setValue('source', value);
-      if (value === 'salary') {
-        form.setValue('cashPercentage', 0);
-      } else {
-        if (value === 'business') {
-          form.setValue('businessIncomePercentage', 100); // Business is 100% of income
-          form.setValue('cashPercentage', 50);
-        } else { // mixed
-          form.setValue('businessIncomePercentage', 50);
-          form.setValue('cashPercentage', 40);
-        }
-      }
-  };
 
   const handlePreset = (presetKey: PresetKey, presetData: PresetData) => {
     setActivePreset(presetKey);
@@ -317,7 +315,7 @@ export function TaxClarityForm() {
                   <FormItem>
                     <FormControl>
                       <RadioGroup 
-                        onValueChange={(v: "salary" | "business" | "mixed") => handleSourceChange(v)}
+                        onValueChange={field.onChange}
                         value={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           <FormItem>
                             <FormControl><RadioGroupItem value='salary' className="sr-only peer" /></FormControl>
@@ -579,7 +577,7 @@ export function TaxClarityForm() {
                       type="button" 
                       size="lg"
                       variant="outline"
-                      onClick={resetForm}
+                      onClick={handleTryOwnIncome}
                     >
                       Recalculate
                     </Button>
