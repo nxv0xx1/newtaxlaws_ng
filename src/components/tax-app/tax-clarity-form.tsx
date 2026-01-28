@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { calculateTaxes } from "@/lib/tax-calculator";
+import { calculateTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
@@ -52,7 +52,7 @@ const BlinkingCursor = () => (
 export function TaxClarityForm() {
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(0);
-  const [results, setResults] = useState<{ taxBefore: number; taxAfter: number } | null>(null);
+  const [results, setResults] = useState<TaxCalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationFeedback, setCalculationFeedback] = useState<string[]>([]);
   const [showReportCTA, setShowReportCTA] = useState(false);
@@ -86,9 +86,9 @@ export function TaxClarityForm() {
       setResults(null);
 
       const feedbacks = [
-        "checking the old tax rules...",
-        "checking the new 2026 rules...",
-        "comparing what you pay...",
+        "running the 2026 numbers...",
+        "breaking down the tax bands...",
+        "finalizing your estimate...",
       ];
       
       for (let i = 0; i < feedbacks.length; i++) {
@@ -96,9 +96,9 @@ export function TaxClarityForm() {
         setCalculationFeedback(prev => [...prev, feedbacks[i]]);
       }
 
-      const { taxBefore, taxAfter } = calculateTaxes(data);
+      const taxResult = calculateTaxes(data);
       
-      setResults({ taxBefore, taxAfter });
+      setResults(taxResult);
       setIsCalculating(false);
   };
   
@@ -198,16 +198,9 @@ export function TaxClarityForm() {
     }).format(amount)}`;
   };
   
-  const difference = results ? results.taxAfter - results.taxBefore : 0;
   const periodDivisor = form.getValues('period') === 'monthly' ? 12 : 1;
-  const isIncrease = difference > 0;
+  const periodName = form.getValues('period');
 
-  const maxTaxForBar = results ? Math.max(results.taxBefore, results.taxAfter, 1) : 1;
-  const barScale = 80; // Bars will take up to 80% of container width
-  const beforeTaxWidth = results ? (results.taxBefore / maxTaxForBar) * barScale : 0;
-  const afterTaxWidth = results ? (results.taxAfter / maxTaxForBar) * barScale : 0;
-  const absDiffAmount = results ? Math.abs(difference) / periodDivisor : 0;
-  
   const renderSection = (s: number, children: React.ReactNode) => (
     <div
       data-section-id={s}
@@ -437,7 +430,7 @@ export function TaxClarityForm() {
           )}
 
           {results && !isCalculating && (
-            <div className="relative space-y-12 !mt-12">
+            <div className="relative space-y-8 !mt-12">
               {activePreset && (
                   <Button variant="ghost" size="icon" onClick={resetForm} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
                       <X className="h-5 w-5" />
@@ -445,35 +438,64 @@ export function TaxClarityForm() {
                   </Button>
               )}
 
-              <div className="space-y-8">
-                {/* Before */}
-                <div>
-                  <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-base text-muted-foreground">Old tax you paid ({form.getValues('period')}ly)</span>
-                    <span className="text-2xl md:text-3xl font-semibold">{formatCurrency(results.taxBefore / periodDivisor)}</span>
-                  </div>
-                  <div className="bg-muted h-3 rounded-full">
-                    <div className="bg-border h-3 rounded-full" style={{ width: `${beforeTaxWidth}%` }}></div>
-                  </div>
-                </div>
+              <h3 className="text-xl font-semibold text-center text-foreground">Your estimated tax under 2026 rules</h3>
 
-                {/* After */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-base text-muted-foreground">New tax you'll pay ({form.getValues('period')}ly)</span>
-                    <span className={cn("text-2xl md:text-3xl font-semibold", isIncrease ? "text-destructive" : "text-primary")}>{formatCurrency(results.taxAfter / periodDivisor)}</span>
-                  </div>
-                  <div className="bg-muted h-3 rounded-full">
-                    <div className={cn("h-3 rounded-full", isIncrease ? "bg-destructive" : "bg-primary")} style={{ width: `${afterTaxWidth}%` }}></div>
-                  </div>
+                  <p className="text-sm text-muted-foreground">You will pay</p>
+                  <p className="text-2xl font-bold">{formatCurrency(results.totalTax / periodDivisor)}
+                    <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">({formatCurrency(results.totalTax)}/year)</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">You keep</p>
+                  <p className="text-2xl font-bold">{formatCurrency(results.netIncome / periodDivisor)}
+                    <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
+                  </p>
+                   <p className="text-xs text-muted-foreground">({formatCurrency(results.netIncome)}/year)</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Effective tax rate</p>
+                  <p className="text-2xl font-bold">{results.effectiveRate.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground invisible">placeholder</p>
                 </div>
               </div>
-              
-              {/* Difference */}
-              <div className={cn("text-center space-y-2 rounded-lg p-6", isIncrease ? "bg-increase-background" : "bg-saving-background")}>
-                  <p className={cn("text-3xl md:text-4xl font-bold tracking-tight", isIncrease ? "text-destructive" : "text-primary")}>
-                      {isIncrease ? `You pay ${formatCurrency(absDiffAmount)} more` : `You save ${formatCurrency(absDiffAmount)}!`}
-                  </p>
+
+              <div>
+                  <p className="text-xs text-center text-muted-foreground mb-2">Your annual income by tax band</p>
+                  <div className="flex h-3 w-full rounded-full overflow-hidden bg-muted">
+                      {results.breakdown.map((item, index) => {
+                          const colors = ["bg-primary/20", "bg-primary/40", "bg-primary/60", "bg-primary/80", "bg-primary"];
+                          if (item.taxable <= 0) return null;
+                          return (
+                              <div
+                                  key={index}
+                                  className={colors[index % colors.length]}
+                                  style={{ width: `${(item.taxable / results.annualIncome) * 100}%` }}
+                                  title={`${item.bandDescription} taxed at ${item.rate * 100}%`}
+                              />
+                          );
+                      })}
+                  </div>
+              </div>
+
+              <div className="space-y-4 rounded-lg bg-card p-4">
+                <h4 className="font-medium">How we calculated it:</h4>
+                <ul className="space-y-2 text-sm">
+                  {results.breakdown.map((item, index) => (
+                    <li key={index} className="flex justify-between items-center">
+                      <span>
+                        {item.bandDescription} at <span className="font-medium">{item.rate * 100}%</span>
+                      </span>
+                      <span className="font-medium font-code">{formatCurrency(item.tax)}</span>
+                    </li>
+                  ))}
+                   <li className="flex justify-between border-t pt-2 mt-2 font-bold text-base">
+                      <span>Total Annual Tax</span>
+                      <span>{formatCurrency(results.totalTax)}</span>
+                  </li>
+                </ul>
               </div>
               
               {activePreset && (
@@ -484,25 +506,25 @@ export function TaxClarityForm() {
 
               {/* Explanation */}
               <div className="space-y-4">
-                <Prompt>Why this happened:</Prompt>
+                <Prompt>Why this happens:</Prompt>
                 <ul className="space-y-3 text-muted-foreground/90 pl-6">
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>The new rules mean the first ₦800,000 of your pay is now tax-free.</span>
+                        <span>The biggest change: the first ₦800,000 of your annual income is now 100% tax-free.</span>
+                    </li>
+                    <li className="flex items-start">
+                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                        <span>New tax rates only apply to the money you earn *above* that tax-free amount.</span>
                     </li>
                     {form.getValues('source') !== 'salary' && (
                         <li className="flex items-start">
                             <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                            <span>For business income, the cash part means less might be taxed in our estimate.</span>
+                            <span>For business income, we assume a portion is in cash, which can affect the final estimate.</span>
                         </li>
                     )}
-                    <li className="flex items-start">
-                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>Tax rates for money earned above the tax-free amount have also changed.</span>
-                    </li>
                 </ul>
                 <div className="text-xs text-muted-foreground pt-4">
-                  <p>Quick estimate using federal rules from the Nigeria Tax Act 2025 (starts 2026). Not official advice — things like deductions or state taxes not included here.</p>
+                  <p>Simplified federal estimate using 2026 rules. Ignores personal reliefs, deductions, state taxes.</p>
                 </div>
               </div>
 

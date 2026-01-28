@@ -5,69 +5,95 @@ export interface TaxInput {
   cashPercentage: number;
 }
 
-const ANNUAL_RELIEF = 200000;
-const CONSOLIDATED_RELIEF_ALLOWANCE_RATE = 0.2;
-
-// Simplified tax calculation logic
-function calculate(annualIncome: number, rules: 'before' | 'after', source: 'salary' | 'business' | 'mixed', cashPercentage: number): number {
-  let taxableIncome = annualIncome;
-
-  // Before 2026: Standard deductions
-  if (rules === 'before') {
-    const cra = Math.max(ANNUAL_RELIEF, annualIncome * 0.01) + CONSOLIDATED_RELIEF_ALLOWANCE_RATE * annualIncome;
-    taxableIncome = annualIncome - cra;
-  }
-  
-  // After 2026: Fewer deductions, but cash income is less "visible" in our model for business
-  if (rules === 'after') {
-      // Model assumption: business/mixed income has some cash component that is harder to tax fully.
-      // This is a gross simplification to create a difference.
-      let effectiveIncome = annualIncome;
-      if (source === 'business' || source === 'mixed') {
-        const cashPortion = annualIncome * (cashPercentage / 100);
-        const nonCashPortion = annualIncome - cashPortion;
-        // Assume only a fraction of cash income is effectively taxed
-        effectiveIncome = nonCashPortion + cashPortion * 0.5;
-      }
-      // Assuming deductions are removed for simplicity
-      taxableIncome = effectiveIncome;
-  }
-
-  if (taxableIncome <= 0) return 0;
-  
-  let tax = 0;
-  
-  // Simplified progressive tax bands (common for both rules, but applied to different taxable incomes)
-  if (taxableIncome > 3000000) {
-    tax += (taxableIncome - 3000000) * (rules === 'before' ? 0.24 : 0.28);
-    taxableIncome = 3000000;
-  }
-  if (taxableIncome > 1600000) {
-    tax += (taxableIncome - 1600000) * (rules === 'before' ? 0.21 : 0.25);
-    taxableIncome = 1600000;
-  }
-  if (taxableIncome > 1100000) {
-    tax += (taxableIncome - 1100000) * (rules === 'before' ? 0.19 : 0.22);
-    taxableIncome = 1100000;
-  }
-  if (taxableIncome > 500000) {
-    tax += (taxableIncome - 500000) * (rules === 'before' ? 0.15 : 0.18);
-    taxableIncome = 500000;
-  }
-  if (taxableIncome > 300000) {
-    tax += (taxableIncome - 300000) * (rules === 'before' ? 0.11 : 0.14);
-    taxableIncome = 300000;
-  }
-  tax += taxableIncome * (rules === 'before' ? 0.07 : 0.10);
-
-  return Math.max(0, tax);
+export interface TaxBreakdown {
+  bandDescription: string;
+  taxable: number;
+  rate: number;
+  tax: number;
 }
 
-export function calculateTaxes(input: TaxInput): { taxBefore: number; taxAfter: number } {
+export interface TaxCalculationResult {
+  totalTax: number;
+  annualIncome: number;
+  netIncome: number;
+  effectiveRate: number;
+  breakdown: TaxBreakdown[];
+}
+
+const brackets = [
+  { limit: 800000, rate: 0.0 },
+  { limit: 3000000, rate: 0.15 },
+  { limit: 5000000, rate: 0.18 },
+  { limit: 10000000, rate: 0.21 },
+  { limit: 20000000, rate: 0.23 },
+  { limit: Infinity, rate: 0.25 },
+];
+
+export function calculateTaxes(input: TaxInput): TaxCalculationResult {
   const annualIncome = input.period === 'monthly' ? input.income * 12 : input.income;
 
-  const taxBefore = calculate(annualIncome, 'before', input.source, input.cashPercentage);
-  const taxAfter = calculate(annualIncome, 'after', input.source, input.cashPercentage);
+  let taxableIncome = annualIncome;
+  // This is a gross simplification to create a difference for business income.
+  if (input.source === 'business' || input.source === 'mixed') {
+    const cashPortion = annualIncome * (input.cashPercentage / 100);
+    const nonCashPortion = annualIncome - cashPortion;
+    // Assume only a fraction of cash income is effectively taxed.
+    taxableIncome = nonCashPortion + cashPortion * 0.5; 
+  }
+  
+  if (taxableIncome <= 0) {
+      return {
+          totalTax: 0,
+          annualIncome,
+          netIncome: annualIncome,
+          effectiveRate: 0,
+          breakdown: [{
+            bandDescription: `First ₦${annualIncome.toLocaleString()}`,
+            taxable: annualIncome,
+            rate: 0,
+            tax: 0
+          }]
+      };
+  }
 
-  return { taxBefore, taxAfter };
+  let totalTax = 0;
+  let remainingIncome = taxableIncome;
+  let lastLimit = 0;
+  const breakdown: TaxBreakdown[] = [];
+
+  for (const bracket of brackets) {
+    if (remainingIncome <= 0) break;
+    
+    const bracketSize = bracket.limit - lastLimit;
+    const incomeInBracket = Math.min(remainingIncome, bracketSize);
+
+    if (incomeInBracket > 0) {
+      const taxInBracket = incomeInBracket * bracket.rate;
+      totalTax += taxInBracket;
+
+      let bandDescription = "";
+      if (lastLimit === 0) {
+          bandDescription = `First ₦${incomeInBracket.toLocaleString()}`;
+      } else if (bracket.limit === Infinity) {
+          bandDescription = `Remaining ₦${incomeInBracket.toLocaleString()}`;
+      } else {
+          bandDescription = `Next ₦${incomeInBracket.toLocaleString()}`;
+      }
+
+      breakdown.push({
+        bandDescription,
+        taxable: incomeInBracket,
+        rate: bracket.rate,
+        tax: taxInBracket,
+      });
+    }
+
+    remainingIncome -= incomeInBracket;
+    lastLimit = bracket.limit;
+  }
+
+  const netIncome = annualIncome - totalTax;
+  const effectiveRate = annualIncome > 0 ? (totalTax / annualIncome) * 100 : 0;
+
+  return { totalTax: Math.max(0, totalTax), annualIncome, netIncome, effectiveRate, breakdown };
 }
