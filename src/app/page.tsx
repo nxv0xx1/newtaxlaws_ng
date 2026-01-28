@@ -6,16 +6,16 @@ export default function Home() {
   return (
     <main className="min-h-screen font-body bg-background text-foreground">
       <div className="container mx-auto max-w-2xl px-4 py-16 sm:py-24">
-        <header className="text-left mb-12">
-          <h1 className="font-headline text-2xl font-medium text-black">
+        <header className="text-center mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold text-black tracking-tight">
             newtaxlaws_ng
-            <span style={{ color: 'hsl(var(--primary))' }}>.</span>
+            <span className="text-primary">.</span>
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            See how the new tax laws affect your money.
+          <p className="mt-4 text-lg text-muted-foreground">
+            See how the new 2026 tax laws affect your money.
           </p>
           
-          <div className="mt-8 space-y-6">
+          <div className="mt-8 space-y-6 text-left">
             <p className="leading-relaxed text-muted-foreground/90">
               Taxes in Nigeria can be a headache, like Lagos traffic. New rules in 2026 are meant to make it simpler. Now the first ₦800,000 you earn in a year is completely tax-free (you pay ₦0 on it).
             </p>
