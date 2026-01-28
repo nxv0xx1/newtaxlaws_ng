@@ -198,7 +198,7 @@ export function TaxClarityForm() {
       </div>
       
       <div className="mb-10">
-        <Prompt>Or, type in your own numbers</Prompt>
+        <Prompt>Or enter your own details below</Prompt>
       </div>
 
       <Form {...form}>
@@ -206,7 +206,7 @@ export function TaxClarityForm() {
           <div className={cn("space-y-10 transition-opacity duration-500", (isCalculating || results) ? 'opacity-50' : 'opacity-100')}>
             {renderSection(0, 
               <div className="space-y-4">
-                  <Prompt>What's your income?</Prompt>
+                  <Prompt>How much do you earn each month or year?</Prompt>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     <FormField
                       control={form.control}
@@ -214,7 +214,7 @@ export function TaxClarityForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input type="number" placeholder="e.g. 150000" className="text-base" {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
+                            <Input type="number" placeholder="e.g., 150000" className="h-14 text-lg" {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -241,7 +241,7 @@ export function TaxClarityForm() {
                       )}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground pt-1">Is that per month or per year? We'll figure it out.</p>
+                  <p className="text-xs text-muted-foreground pt-1">We'll automatically convert monthly ↔ yearly.</p>
               </div>
             )}
 
