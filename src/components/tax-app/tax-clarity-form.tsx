@@ -652,28 +652,28 @@ export function TaxClarityForm() {
                     <Prompt>Want the full story for your situation?</Prompt>
                   </div>
                   
-                  <h3 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
-                    Get your detailed personal report — ₦500
+                  <h3 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground tracking-tight max-w-lg mx-auto">
+                    For just ₦500, unlock your personalized 2026 Tax Report — displayed instantly on this page.
                   </h3>
                   
                   <div className="mt-6 max-w-sm mx-auto text-left">
+                     <p className="font-medium text-foreground mb-3">What you'll get:</p>
                     <ul className="space-y-2 text-muted-foreground/90">
-                        <li className="flex items-start">
-                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                            <span>Step-by-step before vs after calculation</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                            <span>All assumptions explained</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                            <span>Simple chart of your tax bands</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                            <span>Printable web page for your records</span>
-                        </li>
+                        {[
+                            "Full before-2026 vs after-2026 comparison with exact savings",
+                            "Complete tax band breakdown + visual bar chart",
+                            "Personalized cash income analysis + sensitivity (what if cash % changes?)",
+                            "Monthly and annual take-home pay summary",
+                            "Effective tax rate",
+                            "Practical insights & tips",
+                            "All assumptions explained",
+                            "Clean, printable layout",
+                        ].map((item, i) => (
+                            <li key={i} className="flex items-start">
+                                <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                                <span>{item}</span>
+                            </li>
+                        ))}
                     </ul>
                   </div>
                   
@@ -693,7 +693,7 @@ export function TaxClarityForm() {
                           size="lg" 
                           className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
                         >
-                          Get My Report
+                          Get My Report — ₦500
                           <ArrowRight className="ml-2" />
                         </Button>
                       </DialogTrigger>
@@ -701,7 +701,7 @@ export function TaxClarityForm() {
                         <DialogHeader>
                           <DialogTitle>Get Your Detailed Report</DialogTitle>
                           <DialogDescription>
-                            Enter your email below to pay with Paystack. Your report will be sent to this address.
+                            Enter your email below to pay with Paystack. Your report will be displayed on the next page.
                           </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
