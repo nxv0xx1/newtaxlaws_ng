@@ -52,17 +52,52 @@ const renderBandChart = (result: TaxCalculationResult) => {
     );
 };
 
-const getInsight = (newTaxResults: TaxCalculationResult, formData: TaxInput) => {
-    if (newTaxResults.effectiveRate < 5) {
-      return "Your effective tax rate is very low. The new laws benefit you significantly by increasing the tax-free threshold.";
+const getInsight = (
+    newTaxResults: TaxCalculationResult,
+    oldTaxResults: TaxCalculationResult,
+    formData: TaxInput
+): string => {
+    const savings = oldTaxResults.totalTax - newTaxResults.totalTax;
+    const highestBracketValue = newTaxResults.breakdown.length > 0 ? Math.max(...newTaxResults.breakdown.map(b => b.rate)) : 0;
+    const highestBracket = `${highestBracketValue * 100}%`;
+
+    // Scenario 1: No tax payable
+    if (newTaxResults.totalTax <= 0) {
+        return "You fall within the tax-free threshold under the new laws. This means you pay no personal income tax on this income.";
     }
-    if (formData.source === 'business' || formData.source === 'mixed') {
-      return `As a business owner, ensure you're keeping detailed records. You can deduct legitimate business expenses to lower your taxable income.`;
+
+    // Scenario 2: High earners in top bracket
+    if (highestBracketValue >= 0.23) {
+         if (formData.source === 'business' || formData.source === 'mixed') {
+            return `You're in the ${highestBracket} tax bracket. As a business owner, diligently tracking all legitimate expenses is the most effective way to lower your taxable income.`;
+        }
+        return `You're in one of the highest tax brackets (${highestBracket}). Maximizing legal deductions, such as the ₦500,000 annual rent relief, will be most impactful for you.`;
     }
-    const highestBracket = Math.max(...newTaxResults.breakdown.map(b => b.rate));
-    if (highestBracket >= 0.15) {
-      return `Your highest tax bracket is ${highestBracket * 100}%. Consider maximizing legal deductions like rent (up to ₦500k/year) if applicable.`;
+
+    // Scenario 3: Business owners
+    if (formData.source === 'business') {
+        if (formData.cashPercentage > 50) {
+            return `Your tax is estimated based on the cash percentage you provided. Keeping clear records of sales and expenses is crucial for an accurate tax filing.`;
+        }
+        return "As a business owner, your main focus should be on keeping accurate records of all your business expenses to legally reduce your taxable profit.";
     }
+    
+    // Scenario 4: Mixed income source
+    if (formData.source === 'mixed') {
+        return `With mixed income, it's vital to separate your salaried income from your business income. Remember that you can deduct legitimate expenses from your business profit before tax is calculated.`;
+    }
+
+    // Scenario 5: Significant savings for mid-income
+    if (savings > 0 && oldTaxResults.totalTax > 0 && (savings / oldTaxResults.totalTax) > 0.15) {
+        return `You're seeing significant savings mainly because the new ₦800,000 tax-free threshold is much higher than the old reliefs. This benefits low to middle-income earners the most.`;
+    }
+
+    // Scenario 6: Salaried mid-income
+    if (formData.source === 'salary' && newTaxResults.annualIncome > 1000000 && newTaxResults.annualIncome < 5000000) {
+        return `You're in a common tax position. A key new advantage is the ability to deduct up to ₦500,000 from your income for rent, if applicable. Be sure to get official receipts from your landlord.`;
+    }
+
+    // Default catch-all
     return "This report gives you a clear picture of your tax situation under the new 2026 laws. For personalized advice, consult a tax professional.";
 };
 
@@ -174,7 +209,7 @@ export function TaxReport({ data }: TaxReportProps) {
         
         <section className="mb-10 bg-blue-50 border border-blue-200 p-4 rounded-lg">
             <h3 className="text-xl font-semibold text-gray-700 mb-2">Key Insight</h3>
-            <p className="text-gray-800">{getInsight(newTaxResults, formData)}</p>
+            <p className="text-gray-800">{getInsight(newTaxResults, oldTaxResults, formData)}</p>
         </section>
 
         <footer className="mt-12 pt-6 border-t text-xs text-gray-500">
