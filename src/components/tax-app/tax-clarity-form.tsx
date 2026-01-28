@@ -181,8 +181,13 @@ export function TaxClarityForm() {
             </div>
           </div>
           
-          <div className="mb-10">
-            <Prompt>Or enter your own details below</Prompt>
+          <div className="my-16 text-center">
+            <h2 className="text-xl font-medium text-primary">
+              Want to see what happens to your money?
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Enter your income below (takes about 10 seconds)
+            </p>
           </div>
 
           <div className="space-y-6">
@@ -193,7 +198,7 @@ export function TaxClarityForm() {
                     <div className="h-14"></div>
                     <div className="h-10"></div>
                   </div>
-                  <p className="text-xs text-muted-foreground pt-1">We'll automatically convert monthly ↔ yearly.</p>
+                  <p className="text-xs text-muted-foreground pt-1">We'll figure out monthly ↔ yearly for you.</p>
               </div>
             </div>
           </div>
@@ -233,8 +238,13 @@ export function TaxClarityForm() {
         </div>
       </div>
       
-      <div className="mb-10">
-        <Prompt>Or enter your own details below</Prompt>
+      <div className="my-16 text-center">
+        <h2 className="text-xl font-medium text-primary">
+          Want to see what happens to your money?
+        </h2>
+        <p className="mt-2 text-muted-foreground">
+          Enter your income below (takes about 10 seconds)
+        </p>
       </div>
 
       <Form {...form}>
@@ -277,7 +287,7 @@ export function TaxClarityForm() {
                       )}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground pt-1">We'll automatically convert monthly ↔ yearly.</p>
+                  <p className="text-xs text-muted-foreground pt-1">We'll figure out monthly ↔ yearly for you.</p>
               </div>
             )}
 
