@@ -143,7 +143,6 @@ export function TaxClarityForm() {
   
   const difference = results ? results.taxAfter - results.taxBefore : 0;
   const periodDivisor = form.getValues('period') === 'monthly' ? 12 : 1;
-  const percentageChange = results && results.taxBefore > 0 ? (difference / results.taxBefore) * 100 : results && results.taxAfter > 0 ? 100 : 0;
   const isIncrease = difference > 0;
 
   const maxTaxForBar = results ? Math.max(results.taxBefore, results.taxAfter, 1) : 1;
@@ -362,41 +361,29 @@ export function TaxClarityForm() {
               </div>
               
               {/* Difference */}
-              <div className={cn("text-center space-y-2 rounded-lg p-4", isIncrease ? "bg-increase-background" : "bg-saving-background")}>
-                  <p className="text-base text-muted-foreground">Difference</p>
-                  <div className="flex items-center justify-center gap-4">
-                      <p className={cn("text-4xl md:text-5xl font-bold tracking-tight", isIncrease ? "text-destructive" : "text-primary")}>
-                          {isIncrease ? '+' : '-'}{formatCurrency(absDiffAmount)}
-                      </p>
-                      <div className={cn("flex items-center text-xl md:text-2xl font-medium", isIncrease ? "text-destructive" : "text-primary")}>
-                        {isIncrease ? <ArrowUp size={28}/> : <ArrowDown size={28}/>}
-                        <span>{Math.abs(percentageChange).toFixed(0)}%</span>
-                      </div>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                      (You pay {formatCurrency(absDiffAmount)} {isIncrease ? 'more' : 'less'})
+              <div className={cn("text-center space-y-2 rounded-lg p-6", isIncrease ? "bg-increase-background" : "bg-saving-background")}>
+                  <p className={cn("text-3xl md:text-4xl font-bold tracking-tight", isIncrease ? "text-destructive" : "text-primary")}>
+                      {isIncrease ? `You pay ${formatCurrency(absDiffAmount)} more` : `You save ${formatCurrency(absDiffAmount)}!`}
                   </p>
               </div>
 
               {/* Explanation */}
               <div className="space-y-4">
-                <Prompt>So, why did your tax change?</Prompt>
+                <Prompt>Why this happened:</Prompt>
                 <ul className="space-y-3 text-muted-foreground/90 pl-6">
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>Your yearly income is now under the new ₦800,000 "no-tax" amount, which helps a lot.</span>
+                        <span>The new rules mean the first ₦800,000 of your pay is now tax-free.</span>
                     </li>
+                    {form.getValues('source') !== 'salary' && (
+                        <li className="flex items-start">
+                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                            <span>For business income, the cash part means less might be taxed in our estimate.</span>
+                        </li>
+                    )}
                     <li className="flex items-start">
                         <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>
-                            {form.getValues('source') === 'salary'
-                            ? 'Since you earn a salary, all your pay is counted under the new rules.'
-                            : `Because some of your income is in cash (${form.getValues('cashPercentage')}%), our tool guesses that it might be taxed a bit differently.`}
-                        </span>
-                    </li>
-                    <li className="flex items-start">
-                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>The old, confusing system is gone. The new system with different tax levels changes how much you pay in total.</span>
+                        <span>Tax rates for money earned above the tax-free amount have also changed.</span>
                     </li>
                 </ul>
                 <div className="text-xs text-muted-foreground pt-4">
@@ -404,11 +391,14 @@ export function TaxClarityForm() {
                 </div>
               </div>
 
-              <div className="text-center pt-8">
-                <Button type="button" variant="outline" size="lg" onClick={() => console.log("Get detailed breakdown clicked")}>
-                  Get a Detailed Report (₦500)
+              <div className="text-center pt-8 space-y-2">
+                <h3 className="font-medium text-foreground text-lg">Want the full story?</h3>
+                <Button type="button" size="lg" onClick={() => console.log("Get detailed breakdown clicked")}>
+                  Get your personal detailed report for ₦500
                 </Button>
-                <p className="text-xs text-muted-foreground mt-2">See the full numbers, all our guesses, and simple tips.</p>
+                <p className="text-sm text-muted-foreground !mt-1">
+                  (includes exact breakdown, all assumptions, PDF you can keep)
+                </p>
               </div>
             </div>
           )}
