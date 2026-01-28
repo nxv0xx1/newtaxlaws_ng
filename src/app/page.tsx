@@ -81,7 +81,7 @@ export default function Home() {
             .
           </p>
           <p className="text-center text-xs pt-8 text-muted-foreground/80">
-            &copy; 2024 TaxClarity NG. All rights reserved.
+            &copy; 2026 newtaxlaws_ng. All rights reserved.
           </p>
         </footer>
       </div>
