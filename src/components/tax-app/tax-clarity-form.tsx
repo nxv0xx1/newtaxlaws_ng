@@ -264,7 +264,7 @@ export function TaxClarityForm() {
     };
 
     const handler = window.PaystackPop.setup({
-      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_e70a8d38ceee46020aa8b8bde30272ab071bae55',
+      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_a57cfe506f43c31aa18c093b3bec333c74d4ec78',
       email: emailForReport,
       amount: 50000, // ₦500 in kobo
       onClose: () => {
