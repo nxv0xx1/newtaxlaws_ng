@@ -60,6 +60,7 @@ export function TaxClarityForm() {
   const [showReportCTA, setShowReportCTA] = useState(false);
   const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
   const [isResultsVisible, setIsResultsVisible] = useState(false);
+  const [isInputGlowing, setIsInputGlowing] = useState(false);
   
   const resultsRef = useRef<HTMLDivElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
@@ -216,6 +217,10 @@ export function TaxClarityForm() {
         incomeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => {
             incomeInputRef.current?.focus();
+            setIsInputGlowing(true);
+            setTimeout(() => {
+              setIsInputGlowing(false);
+            }, 2000);
         }, 300); // Delay focus to allow for scroll
     }
   };
@@ -304,7 +309,7 @@ export function TaxClarityForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className="h-14 text-lg" {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
+                            <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className={cn("h-14 text-lg", isInputGlowing && "highlight-glow")} {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
