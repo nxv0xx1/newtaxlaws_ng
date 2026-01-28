@@ -215,40 +215,7 @@ export function TaxClarityForm() {
   );
 
   if (!isClient) {
-    return (
-        <div ref={formContainerRef}>
-          <div className="mb-12 space-y-6">
-            <Prompt>Try a sample calculation (no typing needed!)</Prompt>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="w-full text-left p-4 border-2 border-transparent rounded-lg bg-card space-y-1 h-24"></div>
-              <div className="w-full text-left p-4 border-2 border-transparent rounded-lg bg-card space-y-1 h-24"></div>
-              <div className="w-full text-left p-4 border-2 border-transparent rounded-lg bg-card space-y-1 h-24"></div>
-            </div>
-          </div>
-          
-          <div className="my-16 text-center">
-            <h2 className="text-xl font-medium text-primary">
-              Want to see what happens to your money?
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              Enter your income below (takes about 10 seconds)
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="space-y-10">
-              <div className="space-y-4">
-                  <Prompt>How much do you earn each month or year?</Prompt>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                    <div className="h-14"></div>
-                    <div className="h-10"></div>
-                  </div>
-                  <p className="text-xs text-muted-foreground pt-1">We'll figure out monthly ↔ yearly for you.</p>
-              </div>
-            </div>
-          </div>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -497,12 +464,6 @@ export function TaxClarityForm() {
                   </li>
                 </ul>
               </div>
-              
-              {activePreset && (
-                <p className="text-center text-sm text-muted-foreground !-mt-4">
-                  This is an example using sample data.
-                </p>
-              )}
 
               {/* Explanation */}
               <div className="space-y-4">
@@ -531,7 +492,7 @@ export function TaxClarityForm() {
               {activePreset && (
                 <div className="!mt-12 text-center space-y-3">
                   <p className="text-muted-foreground">
-                    Want to see what the new tax laws mean for your actual income?
+                    This is an example. Want to see exactly what you'll pay with your real income?
                   </p>
                   <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
                       Try with my own income
