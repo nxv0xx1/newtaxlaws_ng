@@ -168,15 +168,15 @@ export function TaxClarityForm() {
   return (
     <div ref={formContainerRef}>
       <div className="mb-12 space-y-6">
-        <Prompt>Try a sample to see how it works (no typing needed!)</Prompt>
+        <Prompt>Try a sample calculation (no typing needed!)</Prompt>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             type="button"
             onClick={() => handlePreset({ income: 150000, period: 'monthly', source: 'salary' })}
             className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
           >
-            <p className="font-medium text-card-foreground">Example: ₦150k monthly pay</p>
-            <p className="text-sm text-muted-foreground">See what happens for someone paid a regular salary.</p>
+            <p className="font-medium text-card-foreground">Example: ₦150k monthly salary</p>
+            <p className="text-sm text-muted-foreground">See what happens to a regular salaried worker.</p>
           </button>
           <button
             type="button"
@@ -184,7 +184,7 @@ export function TaxClarityForm() {
             className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
           >
             <p className="font-medium text-card-foreground">Example: ₦2m yearly from a business</p>
-            <p className="text-sm text-muted-foreground">See how getting paid in cash can change your tax.</p>
+            <p className="text-sm text-muted-foreground">See how business income (especially cash payments) changes your tax.</p>
           </button>
           <button
             type="button"
@@ -192,7 +192,7 @@ export function TaxClarityForm() {
             className="w-full text-left p-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors bg-card space-y-1"
           >
             <p className="font-medium text-card-foreground">Example: ₦500k monthly from different sources</p>
-            <p className="text-sm text-muted-foreground">See how it works if you get money from a job and a side hustle.</p>
+            <p className="text-sm text-muted-foreground">See what happens with mixed salary + business or side hustle income.</p>
           </button>
         </div>
       </div>
