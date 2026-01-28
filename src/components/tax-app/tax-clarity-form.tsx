@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -391,14 +391,48 @@ export function TaxClarityForm() {
                 </div>
               </div>
 
-              <div className="text-center pt-8 space-y-2">
-                <h3 className="font-medium text-foreground text-lg">Want the full story?</h3>
-                <Button type="button" size="lg" onClick={() => console.log("Get detailed breakdown clicked")}>
-                  Get your personal detailed report for ₦500
-                </Button>
-                <p className="text-sm text-muted-foreground !mt-1">
-                  (includes exact breakdown, all assumptions, PDF you can keep)
-                </p>
+              {/* CTA for detailed report */}
+              <div className="!mt-20 md:!mt-24 text-center">
+                <div className="inline-block">
+                  <Prompt>Want the full story for your situation?</Prompt>
+                </div>
+                
+                <h3 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+                  Get your detailed personal report — ₦500
+                </h3>
+                
+                <div className="mt-6 max-w-sm mx-auto text-left">
+                  <ul className="space-y-2 text-muted-foreground/90">
+                      <li className="flex items-start">
+                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                          <span>Step-by-step before vs after calculation</span>
+                      </li>
+                      <li className="flex items-start">
+                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                          <span>All assumptions explained</span>
+                      </li>
+                      <li className="flex items-start">
+                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                          <span>Simple chart of your tax bands</span>
+                      </li>
+                      <li className="flex items-start">
+                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
+                          <span>Downloadable PDF</span>
+                      </li>
+                  </ul>
+                </div>
+                
+                <div className="mt-8">
+                  <Button 
+                    type="button" 
+                    size="lg" 
+                    onClick={() => console.log("Get My Report clicked")}
+                    className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
+                  >
+                    Get My Report
+                    <ArrowRight className="ml-2" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
