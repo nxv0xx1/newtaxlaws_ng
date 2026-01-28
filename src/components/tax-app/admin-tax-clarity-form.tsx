@@ -349,7 +349,7 @@ export function AdminTaxClarityForm() {
                       <RadioGroup
                         onValueChange={field.onChange}
                         value={field.value}
-                        className="grid grid-cols-2 md:grid-cols-3 gap-3"
+                        className="grid grid-cols-1 md:grid-cols-3 gap-3"
                       >
                         <div>
                           <RadioGroupItem value="salary" id="source-salary" className="sr-only peer" />
