@@ -475,6 +475,12 @@ export function TaxClarityForm() {
                       {isIncrease ? `You pay ${formatCurrency(absDiffAmount)} more` : `You save ${formatCurrency(absDiffAmount)}!`}
                   </p>
               </div>
+              
+              {activePreset && (
+                <p className="text-center text-sm text-muted-foreground !-mt-4">
+                  This is an example using sample data.
+                </p>
+              )}
 
               {/* Explanation */}
               <div className="space-y-4">
@@ -501,11 +507,14 @@ export function TaxClarityForm() {
               </div>
 
               {activePreset && (
-                <div className="!mt-12 text-center">
-                    <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
-                        Try with my own income
-                        <ArrowRight className="ml-2" />
-                    </Button>
+                <div className="!mt-12 text-center space-y-3">
+                  <p className="text-muted-foreground">
+                    Want to see what the new tax laws mean for your actual income?
+                  </p>
+                  <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
+                      Try with my own income
+                      <ArrowRight className="ml-2" />
+                  </Button>
                 </div>
               )}
 
