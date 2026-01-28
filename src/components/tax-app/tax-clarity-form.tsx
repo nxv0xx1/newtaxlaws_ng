@@ -170,6 +170,7 @@ export function TaxClarityForm() {
     setResults(null);
     setCalculationFeedback([]);
     setActivePreset(null);
+    setShowReportCTA(false);
     form.reset({
       income: undefined,
       period: "monthly",
@@ -186,6 +187,7 @@ export function TaxClarityForm() {
     setResults(null);
     setCalculationFeedback([]);
     setActivePreset(null);
+    setShowReportCTA(false);
     form.reset({
         income: undefined,
         period: "monthly",
@@ -288,7 +290,7 @@ export function TaxClarityForm() {
                     render={({ field }) => (
                       <FormItem className="pt-1">
                         <FormControl>
-                          <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-6">
+                          <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-6">
                             <FormItem className="flex items-center space-x-2 space-y-0">
                               <FormControl><RadioGroupItem value="monthly" /></FormControl>
                               <Label className="font-normal cursor-pointer">Monthly</Label>
@@ -316,7 +318,7 @@ export function TaxClarityForm() {
                     <FormControl>
                       <RadioGroup 
                         onValueChange={(v: "salary" | "business" | "mixed") => handleSourceChange(v)}
-                        defaultValue={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        value={field.value} className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           <FormItem>
                             <FormControl><RadioGroupItem value='salary' className="sr-only peer" /></FormControl>
                             <Label className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors">
@@ -572,7 +574,15 @@ export function TaxClarityForm() {
                     </ul>
                   </div>
                   
-                  <div className="mt-8">
+                  <div className="mt-8 flex items-center justify-center gap-4">
+                    <Button 
+                      type="button" 
+                      size="lg"
+                      variant="outline"
+                      onClick={resetForm}
+                    >
+                      Recalculate
+                    </Button>
                     <Button 
                       type="button" 
                       size="lg" 
