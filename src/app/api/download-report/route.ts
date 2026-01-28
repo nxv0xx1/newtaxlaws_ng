@@ -213,6 +213,7 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error('PDF Generation Error:', error);
-        return NextResponse.json({ error: 'Failed to generate PDF report' }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred. Check the server logs for more details.";
+        return NextResponse.json({ error: `Failed to generate PDF. Server-side error: ${errorMessage}` }, { status: 500 });
     }
 }

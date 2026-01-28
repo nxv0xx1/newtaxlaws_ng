@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { TaxClarityForm } from '@/components/tax-app/tax-clarity-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,8 +10,15 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { ArrowRight } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   return (
     <main className="min-h-screen font-body bg-background text-foreground">
       <div className="container mx-auto max-w-2xl px-4 py-16 sm:py-24">
@@ -58,100 +66,111 @@ export default function Home() {
         </header>
 
         <div className="mb-12 space-y-6">
-          <Tabs defaultValue="individuals" className="w-full">
-            <TabsList className="grid w-full grid-cols-1 h-auto gap-2 md:grid-cols-3">
-              <TabsTrigger value="individuals" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">People & Workers</TabsTrigger>
-              <TabsTrigger value="small-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
-              <TabsTrigger value="large-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="individuals" className="mt-6">
-              <ul className="space-y-4 text-muted-foreground/90 pl-2">
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>The first ₦800,000 you earn each year is completely tax-free.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>You pay 0% on the first ₦800k, then 15% on income up to ₦3 million total, 18% next, 21%, 23%, and 25% for the highest earners.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Low earners (especially minimum wage and entry-level) pay much less tax — or none at all.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>You can deduct 20% of your annual rent (up to ₦500,000 max) from your taxable income.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Interest paid on business loans can be deducted.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Loans you take (personal or business) are not treated as taxable income.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Donations to approved charities are deductible.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Business spending on research & development is deductible.</span>
-                </li>
-                 <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Basic food, medicine, books, school fees, and certain medical services remain VAT-free.</span>
-                </li>
-                 <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Compensation for job loss or injury up to ₦50 million is tax-free.</span>
-                </li>
-              </ul>
-            </TabsContent>
-            
-            <TabsContent value="small-business" className="mt-6">
-              <ul className="space-y-4 text-muted-foreground/90 pl-2">
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>If your annual turnover is under ₦100 million and assets under ₦250 million, you pay 0% company income tax.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Most small businesses are exempt from the new 4% development levy.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>You can choose simple presumptive tax — pay a small flat percentage of your total sales instead of calculating detailed profits.</span>
-                </li>
-              </ul>
-            </TabsContent>
+          {isMounted ? (
+            <Tabs defaultValue="individuals" className="w-full">
+              <TabsList className="grid w-full grid-cols-1 h-auto gap-2 md:grid-cols-3">
+                <TabsTrigger value="individuals" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">People & Workers</TabsTrigger>
+                <TabsTrigger value="small-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
+                <TabsTrigger value="large-business" className="py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="individuals" className="mt-6">
+                <ul className="space-y-4 text-muted-foreground/90 pl-2">
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>The first ₦800,000 you earn each year is completely tax-free.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>You pay 0% on the first ₦800k, then 15% on income up to ₦3 million total, 18% next, 21%, 23%, and 25% for the highest earners.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Low earners (especially minimum wage and entry-level) pay much less tax — or none at all.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>You can deduct 20% of your annual rent (up to ₦500,000 max) from your taxable income.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Interest paid on business loans can be deducted.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Loans you take (personal or business) are not treated as taxable income.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Donations to approved charities are deductible.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Business spending on research & development is deductible.</span>
+                  </li>
+                   <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Basic food, medicine, books, school fees, and certain medical services remain VAT-free.</span>
+                  </li>
+                   <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Compensation for job loss or injury up to ₦50 million is tax-free.</span>
+                  </li>
+                </ul>
+              </TabsContent>
+              
+              <TabsContent value="small-business" className="mt-6">
+                <ul className="space-y-4 text-muted-foreground/90 pl-2">
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>If your annual turnover is under ₦100 million and assets under ₦250 million, you pay 0% company income tax.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Most small businesses are exempt from the new 4% development levy.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>You can choose simple presumptive tax — pay a small flat percentage of your total sales instead of calculating detailed profits.</span>
+                  </li>
+                </ul>
+              </TabsContent>
 
-            <TabsContent value="large-business" className="mt-6">
-              <ul className="space-y-4 text-muted-foreground/90 pl-2">
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Companies with turnover over ₦100 million pay 30% tax on profits.</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>All companies pay a new 4% development levy (this replaces several old levies like education tax).</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Very large international companies must pay at least 15% effective tax rate overall (or top up the difference).</span>
-                </li>
-                <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Capital gains from selling assets are now taxed at 30% (previously 10%).</span>
-                </li>
-                 <li className="flex items-start">
-                    <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                    <span>Foreign companies pay tax only on income earned in Nigeria (plus withholding taxes on dividends, services, etc.).</span>
-                </li>
-              </ul>
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="large-business" className="mt-6">
+                <ul className="space-y-4 text-muted-foreground/90 pl-2">
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Companies with turnover over ₦100 million pay 30% tax on profits.</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>All companies pay a new 4% development levy (this replaces several old levies like education tax).</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Very large international companies must pay at least 15% effective tax rate overall (or top up the difference).</span>
+                  </li>
+                  <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Capital gains from selling assets are now taxed at 30% (previously 10%).</span>
+                  </li>
+                   <li className="flex items-start">
+                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                      <span>Foreign companies pay tax only on income earned in Nigeria (plus withholding taxes on dividends, services, etc.).</span>
+                  </li>
+                </ul>
+              </TabsContent>
+            </Tabs>
+          ) : (
+             <div className="w-full space-y-4">
+                <div className="grid w-full grid-cols-1 h-auto gap-2 md:grid-cols-3">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-48 w-full" />
+            </div>
+          )}
 
           <p className="text-xs text-muted-foreground/80 pt-4 text-center">
             Simplified overview from the Nigeria Tax Act 2025 (effective 2026). Full official text available in the PDF above.
