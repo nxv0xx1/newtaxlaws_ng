@@ -215,7 +215,7 @@ export function TaxClarityForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input type="number" placeholder="e.g. 150000" className="text-base" {...field} onBlur={handleIncomeBlur} />
+                            <Input type="number" placeholder="e.g. 150000" className="text-base" {...field} value={field.value ?? ""} onBlur={handleIncomeBlur} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
