@@ -1,3 +1,5 @@
+"use client";
+
 import { TaxClarityForm } from '@/components/tax-app/tax-clarity-form';
 import { Button } from '@/components/ui/button';
 import {
