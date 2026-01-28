@@ -226,7 +226,7 @@ export function AdminTaxClarityForm() {
 
     try {
         sessionStorage.setItem('reportData', JSON.stringify(reportData));
-        router.push(`/download?ref=ADMIN_SKIP_PAYMENT`);
+        router.push(`/report?ref=ADMIN_SKIP_PAYMENT`);
     } catch (e) {
         console.error("Could not set session storage or redirect", e);
         toast({

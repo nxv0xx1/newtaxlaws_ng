@@ -266,47 +266,34 @@ export function TaxClarityForm() {
             description: "Please wait while we confirm your payment.",
         });
 
-        const verificationResult = await verifyPaystackTransaction(response.reference);
+        if (!results) {
+            toast({ variant: "destructive", title: "Error", description: "Calculation data is missing."});
+            setIsPaying(false);
+            return;
+        }
 
-        if (verificationResult.status === 'success') {
-            toast({
-                title: "Payment Successful!",
-                description: "Redirecting you to the download page...",
-                duration: 5000,
-            });
+        const formData = form.getValues();
+        const oldTaxResults = calculateOldTaxes(formData);
 
-            const formData = form.getValues();
-            const newTaxResults = results; // Already calculated for display
-            const oldTaxResults = calculateOldTaxes(formData);
+        const reportData = {
+            formData,
+            newTaxResults: results,
+            oldTaxResults,
+        };
 
-            const reportData = {
-                formData,
-                newTaxResults,
-                oldTaxResults,
-            };
-
-            try {
-                sessionStorage.setItem('reportData', JSON.stringify(reportData));
-                router.push(`/download?ref=${response.reference}`);
-            } catch (e) {
-                console.error("Could not set session storage or redirect", e);
-                toast({
-                    variant: "destructive",
-                    title: "Failed to prepare report",
-                    description: "There was an error preparing your report data. Please contact support.",
-                });
-            }
-
-        } else {
+        try {
+            sessionStorage.setItem('reportData', JSON.stringify(reportData));
+            router.push(`/report?ref=${response.reference}`);
+        } catch (e) {
+            console.error("Could not set session storage or redirect", e);
             toast({
                 variant: "destructive",
-                title: "Payment Verification Failed",
-                description: verificationResult.message || "Please contact support.",
+                title: "Failed to prepare report",
+                description: "There was an error preparing your report data. Please contact support.",
             });
             setIsPaying(false);
         }
         setIsPaymentDialogOpen(false);
-        // Don't reset isPaying state here on success, as page will redirect
       },
     });
     handler.openIframe();
@@ -685,7 +672,7 @@ export function TaxClarityForm() {
                         </li>
                         <li className="flex items-start">
                             <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                            <span>Downloadable PDF</span>
+                            <span>Printable web page for your records</span>
                         </li>
                     </ul>
                   </div>
