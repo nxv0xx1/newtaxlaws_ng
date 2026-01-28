@@ -33,23 +33,19 @@ const brackets = [
 export function calculateTaxes(input: TaxInput): TaxCalculationResult {
   const annualIncome = input.period === 'monthly' ? input.income * 12 : input.income;
 
-  let taxableIncome = annualIncome;
+  let taxableIncome = annualIncome; // Default for 'salary'
   
   if (input.source === 'business') {
-    const cashPortion = annualIncome * (input.cashPercentage / 100);
-    const nonCashPortion = annualIncome - cashPortion;
-    // Assume only a fraction of cash income is effectively taxed.
-    taxableIncome = nonCashPortion + cashPortion * 0.5;
+    // For business income, this simple estimate assumes only the non-cash portion is taxed.
+    taxableIncome = annualIncome * (1 - (input.cashPercentage / 100));
   } else if (input.source === 'mixed' && input.businessIncomePercentage !== undefined) {
-    const businessIncome = annualIncome * (input.businessIncomePercentage / 100);
-    const salaryIncome = annualIncome - businessIncome;
+    const businessPortion = annualIncome * (input.businessIncomePercentage / 100);
+    const salaryPortion = annualIncome - businessPortion;
 
-    const cashPortionOfBusiness = businessIncome * (input.cashPercentage / 100);
-    const nonCashPortionOfBusiness = businessIncome - cashPortionOfBusiness;
-    
-    const taxableBusinessIncome = nonCashPortionOfBusiness + cashPortionOfBusiness * 0.5;
+    // For the business portion, assume only the non-cash part is taxed.
+    const taxableBusinessIncome = businessPortion * (1 - (input.cashPercentage / 100));
       
-    taxableIncome = salaryIncome + taxableBusinessIncome;
+    taxableIncome = salaryPortion + taxableBusinessIncome;
   }
   
   if (taxableIncome <= 0) {
@@ -59,8 +55,8 @@ export function calculateTaxes(input: TaxInput): TaxCalculationResult {
           netIncome: annualIncome,
           effectiveRate: 0,
           breakdown: [{
-            bandDescription: `First ₦${annualIncome.toLocaleString()}`,
-            taxable: annualIncome,
+            bandDescription: `Taxable Income`,
+            taxable: 0,
             rate: 0,
             tax: 0
           }]
