@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -68,10 +69,10 @@ export default function Home() {
         <div className="mb-12 space-y-6">
           {isMounted ? (
             <Tabs defaultValue="individuals" className="w-full">
-              <TabsList className="grid w-full grid-cols-1 h-auto gap-3 md:grid-cols-3">
-                <TabsTrigger value="individuals" className="py-4 text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">People & Workers</TabsTrigger>
-                <TabsTrigger value="small-business" className="py-4 text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
-                <TabsTrigger value="large-business" className="py-4 text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
+              <TabsList className="grid h-auto w-full grid-cols-1 gap-3 bg-transparent p-0 md:grid-cols-3">
+                <TabsTrigger value="individuals" className="h-auto p-4 text-lg border rounded-md transition-colors hover:bg-primary/5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">People & Workers</TabsTrigger>
+                <TabsTrigger value="small-business" className="h-auto p-4 text-lg border rounded-md transition-colors hover:bg-primary/5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
+                <TabsTrigger value="large-business" className="h-auto p-4 text-lg border rounded-md transition-colors hover:bg-primary/5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
               </TabsList>
               
               <TabsContent value="individuals" className="mt-6">
