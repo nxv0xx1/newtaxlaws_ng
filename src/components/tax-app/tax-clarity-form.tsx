@@ -528,7 +528,7 @@ export function TaxClarityForm() {
 
           {results && !isCalculating && (
             <div className="relative !mt-12">
-              <div className={cn("space-y-8", { "opacity-50 filter blur pointer-events-none": showReportCTA })}>
+              <div className={cn("space-y-8", { "pointer-events-none": showReportCTA })}>
                 {activePreset && (
                     <Button variant="ghost" size="icon" onClick={() => resetForm()} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
                         <X className="h-5 w-5" />
@@ -639,7 +639,7 @@ export function TaxClarityForm() {
               </div>
 
               {showReportCTA && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-background/70 p-4 text-center">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-black/10 p-4 text-center backdrop-blur-[4px]">
                   <div className="max-w-md w-full">
                     <h3 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
                       Unlock your full personal tax calculation and detailed report for just ₦500
@@ -710,5 +710,3 @@ export function TaxClarityForm() {
     </div>
   );
 }
-
-    
