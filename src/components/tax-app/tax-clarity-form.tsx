@@ -21,15 +21,6 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { calculateTaxes, calculateOldTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -90,7 +81,6 @@ export function TaxClarityForm() {
   const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
   const [isResultsVisible, setIsResultsVisible] = useState(false);
   const [isInputGlowing, setIsInputGlowing] = useState(false);
-  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [emailForReport, setEmailForReport] = useState("");
   const [isPaying, setIsPaying] = useState(false);
   const { toast } = useToast();
@@ -292,7 +282,6 @@ export function TaxClarityForm() {
             });
             setIsPaying(false);
         }
-        setIsPaymentDialogOpen(false);
       },
     });
     handler.openIframe();
@@ -672,6 +661,21 @@ export function TaxClarityForm() {
                         ))}
                     </ul>
                   </div>
+
+                  <div className="mt-8 max-w-sm mx-auto text-left">
+                    <Label htmlFor="email-report" className="font-medium">Your email</Label>
+                    <Input 
+                        id="email-report"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={emailForReport}
+                        onChange={(e) => setEmailForReport(e.target.value)}
+                        className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                        Required to get your detailed report and receipt.
+                    </p>
+                  </div>
                   
                   <div className="mt-8 flex items-center justify-center gap-4">
                     <Button 
@@ -682,52 +686,25 @@ export function TaxClarityForm() {
                     >
                       Recalculate
                     </Button>
-                    <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-                      <DialogTrigger asChild>
-                         <Button 
-                          type="button" 
-                          size="lg" 
-                          className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
-                        >
+                    <Button 
+                      type="button" 
+                      size="lg" 
+                      onClick={handlePayment}
+                      disabled={isPaying}
+                      className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
+                    >
+                      {isPaying ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
                           Get My Report — ₦500
                           <ArrowRight className="ml-2" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Get Your Detailed Report</DialogTitle>
-                          <DialogDescription>
-                            Enter your email below to pay with Paystack. Your report will be displayed on the next page.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <Input 
-                                type="email"
-                                placeholder="you@example.com"
-                                value={emailForReport}
-                                onChange={(e) => setEmailForReport(e.target.value)}
-                            />
-                        </div>
-                        <DialogFooter>
-                            <Button
-                              type="button"
-                              size="lg"
-                              className="w-full"
-                              onClick={handlePayment}
-                              disabled={isPaying}
-                            >
-                               {isPaying ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Processing...
-                                </>
-                              ) : (
-                                "Pay ₦500 with Paystack"
-                              )}
-                            </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               )}
