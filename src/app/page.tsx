@@ -70,9 +70,9 @@ export default function Home() {
           {isMounted ? (
             <Tabs defaultValue="individuals" className="w-full">
               <TabsList className="grid h-auto w-full grid-cols-1 gap-3 bg-transparent p-0 md:grid-cols-3">
-                <TabsTrigger value="individuals" className="h-auto p-4 text-lg border rounded-md transition-colors hover:bg-primary/5 data-[state=active]:border-primary data-[state=active]:bg-primary/10 data-[state=active]:shadow-none">People & Workers</TabsTrigger>
-                <TabsTrigger value="small-business" className="h-auto p-4 text-lg border rounded-md transition-colors hover:bg-primary/5 data-[state=active]:border-primary data-[state=active]:bg-primary/10 data-[state=active]:shadow-none">Small Businesses</TabsTrigger>
-                <TabsTrigger value="large-business" className="h-auto p-4 text-lg border rounded-md transition-colors hover:bg-primary/5 data-[state=active]:border-primary data-[state=active]:bg-primary/10 data-[state=active]:shadow-none">Big Companies & Foreign</TabsTrigger>
+                <TabsTrigger value="individuals" className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors text-lg">People &amp; Workers</TabsTrigger>
+                <TabsTrigger value="small-business" className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors text-lg">Small Businesses</TabsTrigger>
+                <TabsTrigger value="large-business" className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors text-lg">Others</TabsTrigger>
               </TabsList>
               
               <TabsContent value="individuals" className="mt-6">
@@ -107,7 +107,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-start">
                       <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Business spending on research & development is deductible.</span>
+                      <span>Business spending on research &amp; development is deductible.</span>
                   </li>
                    <li className="flex items-start">
                       <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
