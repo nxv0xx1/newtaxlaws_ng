@@ -1,0 +1,1 @@
+Please upload your favicon files (e.g., favicon.ico, apple-touch-icon.png) into this 'public' directory. Then, delete this placeholder file.
