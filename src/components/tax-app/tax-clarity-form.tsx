@@ -523,188 +523,169 @@ export function TaxClarityForm() {
           )}
 
           {results && !isCalculating && (
-            <div className="relative space-y-8 !mt-12">
-              {activePreset && (
-                  <Button variant="ghost" size="icon" onClick={() => resetForm()} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
-                      <X className="h-5 w-5" />
-                      <span className="sr-only">Clear results</span>
-                  </Button>
-              )}
+            <div className="relative !mt-12">
+              <div className={cn("space-y-8", { "opacity-40 filter blur-md pointer-events-none": showReportCTA })}>
+                {activePreset && (
+                    <Button variant="ghost" size="icon" onClick={() => resetForm()} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
+                        <X className="h-5 w-5" />
+                        <span className="sr-only">Clear results</span>
+                    </Button>
+                )}
 
-              <h3 className="text-xl font-semibold text-center text-foreground">Your estimated tax under 2026 rules</h3>
+                <h3 className="text-xl font-semibold text-center text-foreground">Your estimated tax under 2026 rules</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-sm text-muted-foreground">You will pay</p>
-                  <p className="text-2xl font-bold">{formatCurrency(results.totalTax / periodDivisor)}
-                    <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">({formatCurrency(results.totalTax)}/year)</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">You keep</p>
-                  <p className="text-2xl font-bold text-primary">{formatCurrency(results.netIncome / periodDivisor)}
-                    <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
-                  </p>
-                   <p className="text-xs text-muted-foreground">({formatCurrency(results.netIncome)}/year)</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Effective tax rate</p>
-                  <p className="text-2xl font-bold">{results.effectiveRate.toFixed(1)}%</p>
-                  <p className="text-xs text-muted-foreground invisible">placeholder</p>
-                </div>
-              </div>
-
-              <div>
-                  <p className="text-xs text-center text-muted-foreground mb-2">Your annual taxable income by tax band</p>
-                  <div className="flex h-3 w-full rounded-full overflow-hidden bg-muted">
-                      {results.breakdown.map((item, index) => {
-                          const colors = ["bg-primary/20", "bg-primary/40", "bg-primary/60", "bg-primary/80", "bg-primary"];
-                          if (item.taxable <= 0) return null;
-                          const widthPercent = (item.taxable / results.taxableIncome) * 100;
-                          return (
-                              <div
-                                  key={index}
-                                  className={cn(colors[index % colors.length], "transition-all duration-1000 ease-out")}
-                                  style={{ width: isResultsVisible ? `${widthPercent}%` : '0%' }}
-                                  title={`${item.bandDescription} taxed at ${item.rate * 100}%`}
-                              />
-                          );
-                      })}
-                  </div>
-                   <div className="flex justify-between text-xs font-code text-muted-foreground mt-1 px-1">
-                      <span>₦0</span>
-                      <span>{formatCurrency(results.taxableIncome)}</span>
-                  </div>
-              </div>
-
-              <div className="space-y-4 rounded-lg bg-card p-4">
-                <h4 className="font-medium">How we calculated it:</h4>
-                <ul className="space-y-2 text-sm">
-                  {results.breakdown.map((item, index) => (
-                    <li key={index} className="flex justify-between items-center">
-                      <span>
-                        {item.bandDescription} at <span className="font-medium">{item.rate * 100}%</span>
-                      </span>
-                      <span className="font-medium font-code">{formatCurrency(item.tax)}</span>
-                    </li>
-                  ))}
-                   <li className="flex justify-between border-t pt-2 mt-2 font-bold text-base">
-                      <span>Total Annual Tax</span>
-                      <span>{formatCurrency(results.totalTax)}</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="text-xs text-center text-muted-foreground">
-                <p>Simplified federal estimate using 2026 rules. Ignores personal reliefs, deductions, state taxes.</p>
-              </div>
-
-              {/* Explanation */}
-              <div className="space-y-4 !mt-12">
-                <Prompt>Why this happens:</Prompt>
-                <ul className="space-y-3 text-muted-foreground/90 pl-6">
-                    <li className="flex items-start">
-                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>The biggest change: the first ₦800,000 of your annual taxable income is now 100% tax-free.</span>
-                    </li>
-                    <li className="flex items-start">
-                        <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                        <span>New tax rates only apply to the money you earn *above* that tax-free amount.</span>
-                    </li>
-                    {form.getValues('source') !== 'salary' && (
-                        <li className="flex items-start">
-                            <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                            <span>For business income, we assume a portion is in cash, which can affect the final estimate.</span>
-                        </li>
-                    )}
-                </ul>
-              </div>
-
-              {activePreset && (
-                <div className="!mt-12 text-center space-y-3">
-                  <p className="text-muted-foreground">
-                    This is an example. Want to see what you'll pay with your real income?
-                  </p>
-                  <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
-                      Try with my own income
-                      <ArrowRight className="ml-2" />
-                  </Button>
-                </div>
-              )}
-
-              {/* CTA for detailed report */}
-              {showReportCTA && (
-                <div className="!mt-20 md:!mt-24 text-center">
-                  <div className="inline-block">
-                    <Prompt>Want the full story for your situation?</Prompt>
-                  </div>
-                  
-                  <h3 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground tracking-tight max-w-lg mx-auto">
-                    For just ₦500, unlock your personalized 2026 Tax Report.
-                  </h3>
-                  
-                  <div className="mt-6 max-w-sm mx-auto text-left">
-                     <p className="font-medium text-foreground mb-3">What you'll get:</p>
-                    <ul className="space-y-2 text-muted-foreground/90">
-                        {[
-                            "Complete tax band breakdown",
-                            "Monthly and annual take-home pay summary",
-                            "Effective tax rate",
-                            "All assumptions explained",
-                            "Clean, printable layout",
-                        ].map((item, i) => (
-                            <li key={i} className="flex items-start">
-                                <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/50"></span>
-                                <span>{item}</span>
-                            </li>
-                        ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-8 max-w-sm mx-auto text-left">
-                    <Label htmlFor="email-report" className="font-medium">Your email</Label>
-                    <Input 
-                        id="email-report"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={emailForReport}
-                        onChange={(e) => setEmailForReport(e.target.value)}
-                        className="mt-2"
-                    />
-                    <p className="text-xs text-muted-foreground mt-2">
-                        Required to get your detailed report and receipt.
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-sm text-muted-foreground">You will pay</p>
+                    <p className="text-2xl font-bold">{formatCurrency(results.totalTax / periodDivisor)}
+                      <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
                     </p>
+                    <p className="text-xs text-muted-foreground">({formatCurrency(results.totalTax)}/year)</p>
                   </div>
-                  
-                  <div className="mt-8 flex items-center justify-center gap-4">
-                    <Button 
-                      type="button" 
-                      size="lg"
-                      variant="outline"
-                      onClick={handleTryOwnIncome}
-                    >
-                      Recalculate
-                    </Button>
-                    <Button 
-                      type="button" 
-                      size="lg" 
-                      onClick={handlePayment}
-                      disabled={isPaying}
-                      className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
-                    >
-                      {isPaying ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          Get My Report — ₦500
-                          <ArrowRight className="ml-2" />
-                        </>
+                  <div>
+                    <p className="text-sm text-muted-foreground">You keep</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(results.netIncome / periodDivisor)}
+                      <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
+                    </p>
+                     <p className="text-xs text-muted-foreground">({formatCurrency(results.netIncome)}/year)</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Effective tax rate</p>
+                    <p className="text-2xl font-bold">{results.effectiveRate.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground invisible">placeholder</p>
+                  </div>
+                </div>
+
+                <div>
+                    <p className="text-xs text-center text-muted-foreground mb-2">Your annual taxable income by tax band</p>
+                    <div className="flex h-3 w-full rounded-full overflow-hidden bg-muted">
+                        {results.breakdown.map((item, index) => {
+                            const colors = ["bg-primary/20", "bg-primary/40", "bg-primary/60", "bg-primary/80", "bg-primary"];
+                            if (item.taxable <= 0) return null;
+                            const widthPercent = (item.taxable / results.taxableIncome) * 100;
+                            return (
+                                <div
+                                    key={index}
+                                    className={cn(colors[index % colors.length], "transition-all duration-1000 ease-out")}
+                                    style={{ width: isResultsVisible ? `${widthPercent}%` : '0%' }}
+                                    title={`${item.bandDescription} taxed at ${item.rate * 100}%`}
+                                />
+                            );
+                        })}
+                    </div>
+                     <div className="flex justify-between text-xs font-code text-muted-foreground mt-1 px-1">
+                        <span>₦0</span>
+                        <span>{formatCurrency(results.taxableIncome)}</span>
+                    </div>
+                </div>
+
+                <div className="space-y-4 rounded-lg bg-card p-4">
+                  <h4 className="font-medium">How we calculated it:</h4>
+                  <ul className="space-y-2 text-sm">
+                    {results.breakdown.map((item, index) => (
+                      <li key={index} className="flex justify-between items-center">
+                        <span>
+                          {item.bandDescription} at <span className="font-medium">{item.rate * 100}%</span>
+                        </span>
+                        <span className="font-medium font-code">{formatCurrency(item.tax)}</span>
+                      </li>
+                    ))}
+                     <li className="flex justify-between border-t pt-2 mt-2 font-bold text-base">
+                        <span>Total Annual Tax</span>
+                        <span>{formatCurrency(results.totalTax)}</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="text-xs text-center text-muted-foreground">
+                  <p>Simplified federal estimate using 2026 rules. Ignores personal reliefs, deductions, state taxes.</p>
+                </div>
+
+                <div className="space-y-4 !mt-12">
+                  <Prompt>Why this happens:</Prompt>
+                  <ul className="space-y-3 text-muted-foreground/90 pl-6">
+                      <li className="flex items-start">
+                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                          <span>The biggest change: the first ₦800,000 of your annual taxable income is now 100% tax-free.</span>
+                      </li>
+                      <li className="flex items-start">
+                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                          <span>New tax rates only apply to the money you earn *above* that tax-free amount.</span>
+                      </li>
+                      {form.getValues('source') !== 'salary' && (
+                          <li className="flex items-start">
+                              <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
+                              <span>For business income, we assume a portion is in cash, which can affect the final estimate.</span>
+                          </li>
                       )}
+                  </ul>
+                </div>
+
+                {activePreset && (
+                  <div className="!mt-12 text-center space-y-3">
+                    <p className="text-muted-foreground">
+                      This is an example. Want to see what you'll pay with your real income?
+                    </p>
+                    <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
+                        Try with my own income
+                        <ArrowRight className="ml-2" />
                     </Button>
+                  </div>
+                )}
+              </div>
+
+              {showReportCTA && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-background/70 p-4 text-center backdrop-blur-sm">
+                  <div className="max-w-md w-full">
+                    <h3 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
+                      Unlock your full personal tax calculation and detailed report for just ₦500
+                    </h3>
+
+                    <div className="mt-6 w-full text-left">
+                      <Label htmlFor="email-report-overlay" className="font-medium">Your email</Label>
+                      <Input
+                          id="email-report-overlay"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={emailForReport}
+                          onChange={(e) => setEmailForReport(e.target.value)}
+                          className="mt-2"
+                      />
+                      <p className="text-xs text-muted-foreground mt-2">
+                          Required for your report and receipt.
+                      </p>
+                    </div>
+                    
+                    <div className="mt-6 flex w-full items-center justify-center gap-4">
+                       <Button 
+                          type="button" 
+                          size="lg"
+                          variant="outline"
+                          onClick={handleTryOwnIncome}
+                          className="h-14"
+                        >
+                          Recalculate
+                        </Button>
+                      <Button 
+                        type="button" 
+                        size="lg" 
+                        onClick={handlePayment}
+                        disabled={isPaying}
+                        className="h-14 flex-1 hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
+                      >
+                        {isPaying ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            Get My Report — ₦500
+                            <ArrowRight className="ml-2" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
