@@ -29,6 +29,7 @@ const formSchema = z.object({
   source: z.enum(["salary", "business", "mixed"]),
   cashPercentage: z.number().min(0).max(100),
   businessIncomePercentage: z.number().min(0).max(100),
+  email: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -81,7 +82,6 @@ export function TaxClarityForm() {
   const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
   const [isResultsVisible, setIsResultsVisible] = useState(false);
   const [isInputGlowing, setIsInputGlowing] = useState(false);
-  const [emailForReport, setEmailForReport] = useState("");
   const [isPaying, setIsPaying] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -101,6 +101,7 @@ export function TaxClarityForm() {
       source: "salary",
       cashPercentage: 0,
       businessIncomePercentage: 50,
+      email: "",
     },
     mode: "onChange",
   });
@@ -227,11 +228,13 @@ export function TaxClarityForm() {
   };
 
   const handlePayment = () => {
+    const emailForReport = form.getValues('email');
+
     if (!emailForReport || !/^\S+@\S+\.\S+$/.test(emailForReport)) {
         toast({
             variant: "destructive",
             title: "Invalid Email",
-            description: "Please enter a valid email address.",
+            description: "Please enter a valid email address to get your report.",
         });
         return;
     }
@@ -524,7 +527,7 @@ export function TaxClarityForm() {
 
           {results && !isCalculating && (
             <div className="relative !mt-12">
-              <div className={cn("space-y-8", { "opacity-40 filter blur-md pointer-events-none": showReportCTA })}>
+              <div className={cn("space-y-8", { "opacity-40 filter blur-lg pointer-events-none": showReportCTA })}>
                 {activePreset && (
                     <Button variant="ghost" size="icon" onClick={() => resetForm()} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
                         <X className="h-5 w-5" />
@@ -635,22 +638,32 @@ export function TaxClarityForm() {
               </div>
 
               {showReportCTA && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-background/70 p-4 text-center backdrop-blur-sm">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-background/70 p-4 text-center">
                   <div className="max-w-md w-full">
                     <h3 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
                       Unlock your full personal tax calculation and detailed report for just ₦500
                     </h3>
 
                     <div className="mt-6 w-full text-left">
-                      <Label htmlFor="email-report-overlay" className="font-medium">Your email</Label>
-                      <Input
-                          id="email-report-overlay"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={emailForReport}
-                          onChange={(e) => setEmailForReport(e.target.value)}
-                          className="mt-2"
-                      />
+                       <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <Label htmlFor="email-report-overlay" className="font-medium">Your email</Label>
+                              <FormControl>
+                                <Input
+                                    id="email-report-overlay"
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    className="mt-2"
+                                    {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       <p className="text-xs text-muted-foreground mt-2">
                           Required for your report and receipt.
                       </p>
