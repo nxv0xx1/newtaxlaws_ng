@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -527,7 +528,7 @@ export function TaxClarityForm() {
 
           {results && !isCalculating && (
             <div className="relative !mt-12">
-              <div className={cn("space-y-8", { "opacity-40 filter blur-lg pointer-events-none": showReportCTA })}>
+              <div className={cn("space-y-8", { "opacity-50 filter blur pointer-events-none": showReportCTA })}>
                 {activePreset && (
                     <Button variant="ghost" size="icon" onClick={() => resetForm()} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
                         <X className="h-5 w-5" />
@@ -709,3 +710,5 @@ export function TaxClarityForm() {
     </div>
   );
 }
+
+    
