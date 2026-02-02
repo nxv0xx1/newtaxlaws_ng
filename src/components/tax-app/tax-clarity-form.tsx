@@ -42,20 +42,19 @@ type PresetData = {
     businessIncomePercentage?: number;
 };
 
-// Declare PaystackPop type for TypeScript based on new v2 API
 interface PaystackOptions {
   key: string;
   email: string;
   amount: number;
   onClose: () => void;
-  onSuccess: (response: { reference: string }) => void;
+  callback: (response: { reference: string }) => void;
 }
 
 declare global {
   interface Window {
     PaystackPop: {
-      new (options: PaystackOptions): {
-        open(): void;
+      setup(options: PaystackOptions): {
+        openIframe(): void;
       };
     };
   }
@@ -256,19 +255,11 @@ export function TaxClarityForm() {
         oldTaxResults,
     };
 
-    // Use the modern new PaystackPop constructor
-    const paystack = new window.PaystackPop({
+    const handler = window.PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_a57cfe506f43c31aa18c093b3bec333c74d4ec78',
       email: emailForReport,
       amount: 20000, // ₦200 in kobo
-      onClose: () => {
-        toast({
-            title: "Payment Cancelled",
-            description: "You have cancelled the payment.",
-        });
-        setIsPaying(false);
-      },
-      onSuccess: (response: { reference: string }) => {
+      callback: (response: { reference: string }) => {
         toast({
             title: "Verifying Payment...",
             description: "Please wait while we confirm your payment.",
@@ -287,9 +278,16 @@ export function TaxClarityForm() {
             setIsPaying(false);
         }
       },
+      onClose: () => {
+        toast({
+            title: "Payment Cancelled",
+            description: "You have cancelled the payment.",
+        });
+        setIsPaying(false);
+      },
     });
     
-    paystack.open();
+    handler.openIframe();
   };
 
   const formatCurrency = (amount: number) => {
