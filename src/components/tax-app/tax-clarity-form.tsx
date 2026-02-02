@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -260,7 +259,7 @@ export function TaxClarityForm() {
     const handler = window.PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_a57cfe506f43c31aa18c093b3bec333c74d4ec78',
       email: emailForReport,
-      amount: 50000, // ₦500 in kobo
+      amount: 20000, // ₦200 in kobo
       onClose: () => {
         toast({
             title: "Payment Cancelled",
@@ -642,7 +641,7 @@ export function TaxClarityForm() {
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-black/10 p-4 text-center backdrop-blur-[4px]">
                   <div className="max-w-md w-full">
                     <h3 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
-                      Unlock your full personal tax calculation and detailed report for just ₦500
+                      Unlock your full personal tax calculation and detailed report for just ₦200
                     </h3>
 
                     <div className="mt-6 w-full text-left">
@@ -694,7 +693,7 @@ export function TaxClarityForm() {
                           </>
                         ) : (
                           <>
-                            Get My Report — ₦500
+                            Get My Report — ₦200
                             <ArrowRight className="ml-2" />
                           </>
                         )}

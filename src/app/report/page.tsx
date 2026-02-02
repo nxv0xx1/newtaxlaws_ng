@@ -61,7 +61,8 @@ function ReportPageContent() {
                     setStatus('error');
                     return;
                 }
-                if ((verificationResult.data?.amount ?? 0) < 500) {
+                // Verify that the amount paid is at least ₦200
+                if ((verificationResult.data?.amount ?? 0) < 200) {
                     setError('Incorrect payment amount recorded. Please contact support.');
                     setStatus('error');
                     return;
