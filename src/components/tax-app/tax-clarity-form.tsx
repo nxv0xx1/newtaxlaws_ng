@@ -42,23 +42,22 @@ type PresetData = {
     businessIncomePercentage?: number;
 };
 
-// Declare PaystackPop type for TypeScript
-interface PaystackPop {
-  setup(options: PaystackOptions): {
-    openIframe(): void;
-  };
-}
+// Declare PaystackPop type for TypeScript based on new v2 API
 interface PaystackOptions {
   key: string;
   email: string;
   amount: number;
-  ref?: string;
   onClose: () => void;
-  callback: (response: { reference: string }) => void;
+  onSuccess: (response: { reference: string }) => void;
 }
+
 declare global {
   interface Window {
-    PaystackPop: PaystackPop;
+    PaystackPop: {
+      new (options: PaystackOptions): {
+        open(): void;
+      };
+    };
   }
 }
 
@@ -207,6 +206,7 @@ export function TaxClarityForm() {
       source: "salary",
       cashPercentage: 0,
       businessIncomePercentage: 50,
+      email: "",
     });
      if(scrollToTop && formContainerRef.current) {
       formContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -256,7 +256,8 @@ export function TaxClarityForm() {
         oldTaxResults,
     };
 
-    const handler = window.PaystackPop.setup({
+    // Use the modern new PaystackPop constructor
+    const paystack = new window.PaystackPop({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_a57cfe506f43c31aa18c093b3bec333c74d4ec78',
       email: emailForReport,
       amount: 20000, // ₦200 in kobo
@@ -267,7 +268,7 @@ export function TaxClarityForm() {
         });
         setIsPaying(false);
       },
-      callback: async (response) => {
+      onSuccess: (response: { reference: string }) => {
         toast({
             title: "Verifying Payment...",
             description: "Please wait while we confirm your payment.",
@@ -287,7 +288,8 @@ export function TaxClarityForm() {
         }
       },
     });
-    handler.openIframe();
+    
+    paystack.open();
   };
 
   const formatCurrency = (amount: number) => {
