@@ -6,8 +6,8 @@ export const metadata: Metadata = {
   title: 'newtaxlaws_ng',
   description: 'See how the new tax laws in Nigeria affect your money.',
   icons: {
-    icon: '/flag.png',
-    apple: '/flag.png',
+    icon: '/flag.png?v=1',
+    apple: '/flag.png?v=1',
   }
 };
 
