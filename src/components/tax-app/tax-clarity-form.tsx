@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, ArrowRight, X } from "lucide-react";
+import { Loader2, ArrowRight, Lock, Check, Banknote, Building2, Wallet } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { calculateTaxes, calculateOldTaxes, TaxCalculationResult } from "@/lib/tax-calculator";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -33,14 +34,6 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
-type PresetKey = 'salary' | 'business' | 'mixed';
-type PresetData = {
-    income: number;
-    period: 'monthly' | 'annually';
-    source: PresetKey;
-    cashPercentage?: number;
-    businessIncomePercentage?: number;
-};
 
 interface PaystackOptions {
   key: string;
@@ -60,36 +53,15 @@ declare global {
   }
 }
 
-const Prompt = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center gap-2 text-foreground font-code">
-    <span className="text-primary">{">"}</span>
-    <span>{children}</span>
-  </div>
-);
-
-const BlinkingCursor = () => (
-  <span className="inline-block h-4 w-2 ml-1 animate-blinking-cursor" />
-);
-
 export function TaxClarityForm() {
   const [isClient, setIsClient] = useState(false);
   const [results, setResults] = useState<TaxCalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [calculationFeedback, setCalculationFeedback] = useState<string[]>([]);
-  const [showReportCTA, setShowReportCTA] = useState(false);
-  const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
-  const [isResultsVisible, setIsResultsVisible] = useState(false);
-  const [isInputGlowing, setIsInputGlowing] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const formContainerRef = useRef<HTMLDivElement>(null);
-  const samplesRef = useRef<HTMLDivElement>(null);
-  const incomeInputRef = useRef<HTMLInputElement>(null);
-  const incomeContainerRef = useRef<HTMLDivElement>(null);
 
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -105,11 +77,12 @@ export function TaxClarityForm() {
   });
 
   const source = form.watch("source");
+  const period = form.watch("period");
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
+
   useEffect(() => {
     if (source === 'salary') {
       form.setValue('businessIncomePercentage', 0);
@@ -120,173 +93,79 @@ export function TaxClarityForm() {
         form.setValue('cashPercentage', 50);
       }
     } else if (source === 'mixed') {
-      if(form.getValues('businessIncomePercentage') === 0 || form.getValues('businessIncomePercentage') === 100) {
+      if (form.getValues('businessIncomePercentage') === 0 || form.getValues('businessIncomePercentage') === 100) {
         form.setValue('businessIncomePercentage', 50);
       }
-       if (form.getValues('cashPercentage') === 0) {
+      if (form.getValues('cashPercentage') === 0) {
         form.setValue('cashPercentage', 40);
       }
     }
   }, [source, form]);
 
 
-  useEffect(() => {
-    if (results && !isCalculating) {
-      const timer = setTimeout(() => setIsResultsVisible(true), 100);
-      return () => clearTimeout(timer);
-    }
-    if (!results) {
-      setIsResultsVisible(false);
-    }
-  }, [results, isCalculating]);
-
   const calculateAndShowResults = async (data: FormData) => {
-      setIsCalculating(true);
-      setCalculationFeedback([]);
-      setResults(null);
-      
-      setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100)
+    setIsCalculating(true);
+    setResults(null);
 
+    // Simulate calculation delay for effect
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-      const feedbacks = [
-        "checking the shiny new 2026 rules...",
-        "applying bands...",
-        "doing the final sum...",
-        "here is your future tax bill...",
-      ];
-      
-      for (let i = 0; i < feedbacks.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        setCalculationFeedback(prev => [...prev, feedbacks[i]]);
-      }
+    const taxResult = calculateTaxes(data);
+    setResults(taxResult);
+    setIsCalculating(false);
 
-      const taxResult = calculateTaxes(data);
-      
-      setResults(taxResult);
-      setIsCalculating(false);
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   };
-  
-  useEffect(() => {
-    if (results && resultsRef.current) {
-      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [results]);
 
-  const handlePreset = (presetKey: PresetKey, presetData: PresetData) => {
-    setActivePreset(presetKey);
-    setShowReportCTA(false);
-    const data: FormData = {
-      income: presetData.income,
-      period: presetData.period,
-      source: presetData.source,
-      cashPercentage: presetData.cashPercentage ?? 0,
-      businessIncomePercentage: presetData.businessIncomePercentage ?? 50,
-    };
-    form.reset(data);
-    calculateAndShowResults(data);
-  };
-  
   const onManualSubmit = (data: FormData) => {
-    setActivePreset(null);
-    setShowReportCTA(true);
     calculateAndShowResults(data);
   }
-
-  const resetForm = (scrollToTop = true) => {
-    setResults(null);
-    setCalculationFeedback([]);
-    setActivePreset(null);
-    setShowReportCTA(false);
-    form.reset({
-      income: undefined,
-      period: "monthly",
-      source: "salary",
-      cashPercentage: 0,
-      businessIncomePercentage: 50,
-      email: "",
-    });
-     if(scrollToTop && formContainerRef.current) {
-      formContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-  
-  const handleTryOwnIncome = () => {
-    resetForm(false);
-    if (incomeContainerRef.current) {
-        incomeContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => {
-            if(incomeInputRef.current) {
-              incomeInputRef.current.focus();
-              setIsInputGlowing(true);
-              setTimeout(() => setIsInputGlowing(false), 2000);
-            }
-        }, 300);
-    }
-  };
 
   const handlePayment = () => {
     const emailForReport = form.getValues('email');
 
     if (!emailForReport || !/^\S+@\S+\.\S+$/.test(emailForReport)) {
-        toast({
-            variant: "destructive",
-            title: "Invalid Email",
-            description: "Please enter a valid email address to get your report.",
-        });
-        return;
+      toast({
+        variant: "destructive",
+        title: "Email Required",
+        description: "Please enter your email to receive the report.",
+      });
+      return;
     }
-    
+
     setIsPaying(true);
 
     if (!results) {
-        toast({ variant: "destructive", title: "Error", description: "Calculation data is missing."});
-        setIsPaying(false);
-        return;
+      toast({ variant: "destructive", title: "Error", description: "Calculation data is missing." });
+      setIsPaying(false);
+      return;
     }
 
     const formData = form.getValues();
     const oldTaxResults = calculateOldTaxes(formData);
-
-    const reportData = {
-        formData,
-        newTaxResults: results,
-        oldTaxResults,
-    };
+    const reportData = { formData, newTaxResults: results, oldTaxResults };
 
     const handler = window.PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_a57cfe506f43c31aa18c093b3bec333c74d4ec78',
       email: emailForReport,
       amount: 20000, // ₦200 in kobo
       callback: (response: { reference: string }) => {
-        toast({
-            title: "Verifying Payment...",
-            description: "Please wait while we confirm your payment.",
-        });
-
         try {
-            sessionStorage.setItem('reportData', JSON.stringify(reportData));
-            router.push(`/report?ref=${response.reference}`);
+          sessionStorage.setItem('reportData', JSON.stringify(reportData));
+          router.push(`/report?ref=${response.reference}`);
         } catch (e) {
-            console.error("Could not set session storage or redirect", e);
-            toast({
-                variant: "destructive",
-                title: "Failed to prepare report",
-                description: "There was an error preparing your report data. Please contact support.",
-            });
-            setIsPaying(false);
+          console.error("Error", e);
+          toast({ variant: "destructive", title: "Error", description: "Failed to prepare report." });
+          setIsPaying(false);
         }
       },
       onClose: () => {
-        toast({
-            title: "Payment Cancelled",
-            description: "You have cancelled the payment.",
-        });
         setIsPaying(false);
       },
     });
-    
+
     handler.openIframe();
   };
 
@@ -296,71 +175,48 @@ export function TaxClarityForm() {
       maximumFractionDigits: 0,
     }).format(amount)}`;
   };
-  
-  const periodDivisor = form.getValues('period') === 'monthly' ? 12 : 1;
-  const periodName = form.getValues('period');
+
+  const periodDivisor = period === 'monthly' ? 12 : 1;
 
   if (!isClient) {
     return null;
   }
 
   return (
-    <div ref={formContainerRef}>
-      <div ref={samplesRef} className="mb-12 space-y-6">
-        <Prompt>Try a sample calculation (no typing needed!)</Prompt>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button
-            type="button"
-            onClick={() => handlePreset('salary', { income: 150000, period: 'monthly', source: 'salary' })}
-            className="w-full text-left p-4 border-2 rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
-            data-active={activePreset === 'salary'}
-          >
-            <p className="font-medium text-card-foreground">Example: ₦150k monthly salary</p>
-            <p className="text-sm text-muted-foreground">See what happens to a regular salaried worker.</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePreset('business', { income: 2000000, period: 'annually', source: 'business', cashPercentage: 50 })}
-            className="w-full text-left p-4 border-2 rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
-            data-active={activePreset === 'business'}
-          >
-            <p className="font-medium text-card-foreground">Example: ₦2m yearly from a business</p>
-            <p className="text-sm text-muted-foreground">See how business income changes your tax.</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePreset('mixed', { income: 500000, period: 'monthly', source: 'mixed', cashPercentage: 40, businessIncomePercentage: 50 })}
-            className="w-full text-left p-4 border-2 rounded-lg transition-colors bg-card space-y-1 data-[active=true]:border-primary data-[active=true]:bg-[#E6F4EA] hover:border-primary"
-            data-active={activePreset === 'mixed'}
-          >
-            <p className="font-medium text-card-foreground">Example: ₦500k monthly from different sources</p>
-            <p className="text-sm text-muted-foreground">See what happens with mixed income.</p>
-          </button>
-        </div>
-      </div>
-      
-      <div className="my-16 text-center">
-        <h2 className="text-xl font-medium text-primary">
-          Want to see what happens to your money?
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Enter your income below (takes about 10 seconds)
-        </p>
-      </div>
+    <div className="w-full max-w-2xl mx-auto">
+      <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="bg-emerald-900 text-white p-8 text-center space-y-2">
+          <CardTitle className="font-serif text-2xl md:text-3xl">Tax Calculator</CardTitle>
+          <CardDescription className="text-emerald-100/80 text-base">
+            Instant 2026 estimate based on official rules.
+          </CardDescription>
+        </CardHeader>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-6">
-          <div className={cn("space-y-10 transition-opacity duration-500", (isCalculating || results) ? 'opacity-50 pointer-events-none' : 'opacity-100')}>
-            <div ref={incomeContainerRef} className="space-y-4">
-                <Prompt>How much do you earn each month or year?</Prompt>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        <CardContent className="p-6 md:p-8 space-y-8">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-8">
+
+              {/* Income Input */}
+              <div className="space-y-4">
+                <Label className="text-base font-semibold text-emerald-900">Annual or Monthly Income</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 items-start">
                   <FormField
                     control={form.control}
                     name="income"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <FormControl>
-                          <Input ref={incomeInputRef} type="number" placeholder="e.g., 150000" className={cn("h-14 text-lg", isInputGlowing && "highlight-glow")} {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} value={field.value ?? ""} />
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">₦</span>
+                            <Input
+                              type="number"
+                              placeholder="e.g. 5,000,000"
+                              className="h-14 pl-10 text-lg bg-white border-emerald-100 focus-visible:ring-emerald-500"
+                              {...field}
+                              onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}
+                              value={field.value ?? ""}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -370,16 +226,24 @@ export function TaxClarityForm() {
                     control={form.control}
                     name="period"
                     render={({ field }) => (
-                      <FormItem className="pt-1">
+                      <FormItem className="flex bg-muted p-1 rounded-lg h-14 items-center">
                         <FormControl>
-                          <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-6">
-                            <FormItem className="flex items-center space-x-2 space-y-0">
-                              <FormControl><RadioGroupItem value="monthly" /></FormControl>
-                              <Label className="font-normal cursor-pointer">Monthly</Label>
+                          <RadioGroup onValueChange={field.onChange} value={field.value} className="flex gap-0">
+                            <FormItem className="space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="monthly" className="sr-only peer" />
+                              </FormControl>
+                              <Label className="px-4 py-2.5 rounded-md cursor-pointer text-sm font-medium transition-all peer-data-[state=checked]:bg-white peer-data-[state=checked]:shadow-sm peer-data-[state=checked]:text-emerald-900 text-muted-foreground">
+                                Monthly
+                              </Label>
                             </FormItem>
-                            <FormItem className="flex items-center space-x-2 space-y-0">
-                              <FormControl><RadioGroupItem value="annually" /></FormControl>
-                              <Label className="font-normal cursor-pointer">Annually</Label>
+                            <FormItem className="space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="annually" className="sr-only peer" />
+                              </FormControl>
+                              <Label className="px-4 py-2.5 rounded-md cursor-pointer text-sm font-medium transition-all peer-data-[state=checked]:bg-white peer-data-[state=checked]:shadow-sm peer-data-[state=checked]:text-emerald-900 text-muted-foreground">
+                                Yearly
+                              </Label>
                             </FormItem>
                           </RadioGroup>
                         </FormControl>
@@ -387,325 +251,217 @@ export function TaxClarityForm() {
                     )}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground pt-1">We'll figure out monthly ↔ yearly for you.</p>
-            </div>
+              </div>
 
-            <div className="space-y-4">
-              <Prompt>Where does your money come from?</Prompt>
-              <FormField
-                control={form.control}
-                name="source"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="grid grid-cols-1 md:grid-cols-3 gap-3"
-                      >
-                        <div>
-                          <RadioGroupItem value="salary" id="source-salary" className="sr-only peer" />
-                          <Label
-                            htmlFor="source-salary"
-                            className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors"
-                          >
-                            Salary job
-                          </Label>
-                        </div>
-                        <div>
-                          <RadioGroupItem value="business" id="source-business" className="sr-only peer" />
-                          <Label
-                            htmlFor="source-business"
-                            className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors"
-                          >
-                            My own business
-                          </Label>
-                        </div>
-                        <div>
-                          <RadioGroupItem value="mixed" id="source-mixed" className="sr-only peer" />
-                          <Label
-                            htmlFor="source-mixed"
-                            className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors"
-                          >
-                            A mix of both
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            {source === 'mixed' && (
+              {/* Source Selection */}
               <div className="space-y-4">
-                <Prompt>What's the mix? ({form.watch('businessIncomePercentage')}%)</Prompt>
-                <p className="text-xs text-muted-foreground -mt-2">Drag the slider to show how your income is split between salary and business.</p>
+                <Label className="text-base font-semibold text-emerald-900">Income Source</Label>
                 <FormField
                   control={form.control}
-                  name="businessIncomePercentage"
+                  name="source"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Slider
-                          value={[field.value || 50]}
-                          max={100}
-                          step={5}
-                          onValueChange={value => field.onChange(value[0])}
-                        />
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          className="grid grid-cols-1 md:grid-cols-3 gap-3"
+                        >
+                          {[
+                            { id: "salary", label: "Salary Only", icon: Wallet },
+                            { id: "business", label: "Business", icon: Building2 },
+                            { id: "mixed", label: "Mixture", icon: Banknote },
+                          ].map((item) => (
+                            <div key={item.id}>
+                              <RadioGroupItem value={item.id} id={`source-${item.id}`} className="sr-only peer" />
+                              <Label
+                                htmlFor={`source-${item.id}`}
+                                className="flex flex-col items-center justify-center gap-2 h-24 p-2 border-2 border-muted bg-white rounded-xl cursor-pointer hover:border-emerald-200 hover:bg-emerald-50/50 transition-all peer-data-[state=checked]:border-emerald-600 peer-data-[state=checked]:bg-emerald-50 peer-data-[state=checked]:text-emerald-900"
+                              >
+                                <item.icon className="h-6 w-6 opacity-70" />
+                                <span className="font-medium">{item.label}</span>
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
                       </FormControl>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Mostly Salary</span>
-                        <span>Mostly Business</span>
-                      </div>
                     </FormItem>
                   )}
                 />
               </div>
-            )}
 
-            {source !== 'salary' && (
-              <div className="space-y-4">
-                <Prompt>
-                  {source === 'business'
-                    ? `Estimate % received as cash (${form.watch('cashPercentage')}%)`
-                    : `Of the business part, what % is cash? (${form.watch('cashPercentage')}%)`}
-                </Prompt>
-                 <p className="text-xs text-muted-foreground -mt-2">
-                   {source === 'business' 
-                     ? "Common for business owners. We make a simple guess on how this affects your tax."
-                     : "Estimate the cash portion of your side hustle. This can affect the tax estimate."
-                   }
-                 </p>
-                <FormField
-                  control={form.control}
-                  name="cashPercentage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Slider 
-                          value={[field.value]} 
-                          max={100} 
-                          step={5} 
-                          onValueChange={value => field.onChange(value[0])} 
-                        />
-                      </FormControl>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Almost No Cash</span>
-                        <span>Almost All Cash</span>
-                      </div>
-                    </FormItem>
+              {/* Dynamic Sliders */}
+              {source !== 'salary' && (
+                <div className="p-4 bg-muted/30 rounded-xl space-y-6 border border-border/50 animate-fade-in-up">
+                  {source === 'mixed' && (
+                    <FormField
+                      control={form.control}
+                      name="businessIncomePercentage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex justify-between mb-2">
+                            <Label>Calculated Split</Label>
+                            <span className="text-xs font-mono bg-white px-2 py-0.5 rounded border">{field.value}% Business</span>
+                          </div>
+                          <FormControl>
+                            <Slider
+                              value={[field.value || 50]}
+                              max={100}
+                              step={5}
+                              onValueChange={value => field.onChange(value[0])}
+                              className="py-2"
+                            />
+                          </FormControl>
+                          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                            <span>Salary</span>
+                            <span>Business</span>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
-              </div>
-            )}
-            
-            <Button type="submit" size="lg" disabled={isCalculating} className="w-full !mt-12 h-14">
+                  <FormField
+                    control={form.control}
+                    name="cashPercentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex justify-between mb-2">
+                          <Label>Cash estimate for business</Label>
+                          <span className="text-xs font-mono bg-white px-2 py-0.5 rounded border">{field.value}% Cash</span>
+                        </div>
+                        <FormControl>
+                          <Slider
+                            value={[field.value]}
+                            max={100}
+                            step={5}
+                            onValueChange={value => field.onChange(value[0])}
+                            className="py-2"
+                          />
+                        </FormControl>
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>Digital</span>
+                          <span>Cash</span>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full h-14 text-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all font-heading tracking-wide"
+                disabled={isCalculating}
+              >
                 {isCalculating ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Calculating...
                   </>
                 ) : (
-                  "Calculate My Tax"
+                  "Calculate Estimates"
                 )}
-            </Button>
-          </div>
+              </Button>
+            </form>
+          </Form>
 
-          {(isCalculating || results) && (
-            <div className="!mt-16 space-y-2" ref={resultsRef}>
-                {calculationFeedback.map((fb, index) => (
-                  <div key={index} className="flex items-center gap-2 text-muted-foreground">
-                    <span>{">"}</span>
-                    <span>{fb}</span>
-                    {isCalculating && index === calculationFeedback.length - 1 && <BlinkingCursor />}
-                  </div>
-                ))}
-            </div>
-          )}
-
+          {/* Application Results */}
           {results && !isCalculating && (
-            <div className="relative !mt-12">
-              <div className={cn("space-y-8", { "pointer-events-none": showReportCTA })}>
-                {activePreset && (
-                    <Button variant="ghost" size="icon" onClick={() => resetForm()} className="absolute -top-4 -right-2 h-8 w-8 text-muted-foreground rounded-full hover:bg-muted">
-                        <X className="h-5 w-5" />
-                        <span className="sr-only">Clear results</span>
-                    </Button>
-                )}
+            <div ref={resultsRef} className="animate-fade-in-up space-y-6 pt-8 border-t border-dashed">
 
-                <h3 className="text-xl font-semibold text-center text-foreground">Your estimated tax under 2026 rules</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                  <div>
-                    <p className="text-sm text-muted-foreground">You will pay</p>
-                    <p className="text-2xl font-bold">{formatCurrency(results.totalTax / periodDivisor)}
-                      <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">({formatCurrency(results.totalTax)}/year)</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">You keep</p>
-                    <p className="text-2xl font-bold text-primary">{formatCurrency(results.netIncome / periodDivisor)}
-                      <span className="text-sm font-normal">/{periodName === 'monthly' ? 'month' : 'year'}</span>
-                    </p>
-                     <p className="text-xs text-muted-foreground">({formatCurrency(results.netIncome)}/year)</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Effective tax rate</p>
-                    <p className="text-2xl font-bold">{results.effectiveRate.toFixed(1)}%</p>
-                    <p className="text-xs text-muted-foreground invisible">placeholder</p>
-                  </div>
+              {/* Free Result: Total Tax */}
+              <div className="text-center space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Total Estimated Tax</h3>
+                <div className="text-5xl md:text-6xl font-serif font-bold text-emerald-900 tracking-tight">
+                  {formatCurrency(results.totalTax / periodDivisor)}
+                  <span className="text-lg text-muted-foreground font-sans font-normal ml-1">
+                    /{period === 'monthly' ? 'mo' : 'yr'}
+                  </span>
                 </div>
-
-                <div>
-                    <p className="text-xs text-center text-muted-foreground mb-2">Your annual taxable income by tax band</p>
-                    <div className="flex h-3 w-full rounded-full overflow-hidden bg-muted">
-                        {results.breakdown.map((item, index) => {
-                            const colors = ["bg-primary/20", "bg-primary/40", "bg-primary/60", "bg-primary/80", "bg-primary"];
-                            if (item.taxable <= 0) return null;
-                            const widthPercent = (item.taxable / results.taxableIncome) * 100;
-                            return (
-                                <div
-                                    key={index}
-                                    className={cn(colors[index % colors.length], "transition-all duration-1000 ease-out")}
-                                    style={{ width: isResultsVisible ? `${widthPercent}%` : '0%' }}
-                                    title={`${item.bandDescription} taxed at ${item.rate * 100}%`}
-                                />
-                            );
-                        })}
-                    </div>
-                     <div className="flex justify-between text-xs font-code text-muted-foreground mt-1 px-1">
-                        <span>₦0</span>
-                        <span>{formatCurrency(results.taxableIncome)}</span>
-                    </div>
-                </div>
-
-                <div className="space-y-4 rounded-lg bg-card p-4">
-                  <h4 className="font-medium">How we calculated it:</h4>
-                  <ul className="space-y-2 text-sm">
-                    {results.breakdown.map((item, index) => (
-                      <li key={index} className="flex justify-between items-center">
-                        <span>
-                          {item.bandDescription} at <span className="font-medium">{item.rate * 100}%</span>
-                        </span>
-                        <span className="font-medium font-code">{formatCurrency(item.tax)}</span>
-                      </li>
-                    ))}
-                     <li className="flex justify-between border-t pt-2 mt-2 font-bold text-base">
-                        <span>Total Annual Tax</span>
-                        <span>{formatCurrency(results.totalTax)}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="text-xs text-center text-muted-foreground">
-                  <p>Simplified federal estimate using 2026 rules. Ignores personal reliefs, deductions, state taxes.</p>
-                </div>
-
-                <div className="space-y-4 !mt-12">
-                  <Prompt>Why this happens:</Prompt>
-                  <ul className="space-y-3 text-muted-foreground/90 pl-6">
-                      <li className="flex items-start">
-                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                          <span>The biggest change: the first ₦800,000 of your annual taxable income is now 100% tax-free.</span>
-                      </li>
-                      <li className="flex items-start">
-                          <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                          <span>New tax rates only apply to the money you earn *above* that tax-free amount.</span>
-                      </li>
-                      {form.getValues('source') !== 'salary' && (
-                          <li className="flex items-start">
-                              <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                              <span>For business income, we assume a portion is in cash, which can affect the final estimate.</span>
-                          </li>
-                      )}
-                  </ul>
-                </div>
-
-                {activePreset && (
-                  <div className="!mt-12 text-center space-y-3">
-                    <p className="text-muted-foreground">
-                      This is an example. Want to see what you'll pay with your real income?
-                    </p>
-                    <Button onClick={handleTryOwnIncome} size="lg" className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
-                        Try with my own income
-                        <ArrowRight className="ml-2" />
-                    </Button>
-                  </div>
-                )}
+                <p className="text-sm text-green-600 font-medium flex items-center justify-center gap-1">
+                  <Check className="h-4 w-4" />
+                  Use this figure for your planning
+                </p>
               </div>
 
-              {showReportCTA && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-black/10 p-4 text-center backdrop-blur-[4px]">
-                  <div className="max-w-md w-full">
-                    <h3 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
-                      Unlock your full personal tax calculation and detailed report for just ₦200
-                    </h3>
+              {/* Locked Detailed Section */}
+              <div className="relative rounded-xl border border-border overflow-hidden cursor-not-allowed group">
 
-                    <div className="mt-6 w-full text-left">
-                       <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <Label htmlFor="email-report-overlay" className="font-medium">Your email</Label>
-                              <FormControl>
-                                <Input
-                                    id="email-report-overlay"
-                                    type="email"
-                                    placeholder="you@example.com"
-                                    className="mt-2"
-                                    {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      <p className="text-xs text-muted-foreground mt-2">
-                          Required for your report and receipt.
-                      </p>
+                {/* Blurry Content */}
+                <div className="p-6 bg-muted/20 text-muted-foreground filter blur-[5px] select-none pointer-events-none opacity-60">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-lg">
+                      <span>Net Take Home</span>
+                      <span className="font-bold">₦250,000</span>
                     </div>
-                    
-                    <div className="mt-6 flex w-full items-center justify-center gap-4">
-                       <Button 
-                          type="button" 
-                          size="lg"
-                          variant="outline"
-                          onClick={handleTryOwnIncome}
-                          className="h-14"
-                        >
-                          Recalculate
-                        </Button>
-                      <Button 
-                        type="button" 
-                        size="lg" 
-                        onClick={handlePayment}
-                        disabled={isPaying}
-                        className="h-14 flex-1 hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150"
-                      >
-                        {isPaying ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            Get My Report — ₦200
-                            <ArrowRight className="ml-2" />
-                          </>
-                        )}
-                      </Button>
+                    <div className="flex justify-between items-center text-lg">
+                      <span>Effective Rate</span>
+                      <span className="font-bold">12.5%</span>
+                    </div>
+                    <div className="h-px bg-border my-4" />
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Exempt Income</span>
+                        <span>₦800,000</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Band 1 (15%)</span>
+                        <span>₦45,000</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
+
+                {/* Unlock Overlay */}
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[2px] p-6 text-center">
+                  <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 mb-4 shadow-sm">
+                    <Lock className="h-6 w-6" />
+                  </div>
+                  <h4 className="font-serif text-xl font-bold text-emerald-950 mb-2">Unlock Full Breakdown</h4>
+                  <p className="text-muted-foreground mb-6 max-w-xs text-sm">
+                    Get your Net Income, Effective Rate, and a downloadable PDF report for your records.
+                  </p>
+
+                  <div className="w-full max-w-xs space-y-3">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="Enter your email"
+                              className="bg-white"
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      onClick={handlePayment}
+                      disabled={isPaying}
+                      className="w-full bg-emerald-800 hover:bg-emerald-900 text-white shadow-lg shadow-emerald-900/10"
+                    >
+                      {isPaying ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          Unlock full report — ₦200
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
-        </form>
-      </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

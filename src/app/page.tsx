@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,7 +9,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -19,191 +18,198 @@ export default function Home() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
-  return (
-    <main className="min-h-screen font-body bg-background text-foreground">
-      <div className="container mx-auto max-w-2xl px-4 pb-16 sm:pb-24">
-        <header className="text-center mb-12 pt-5 md:pt-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-black tracking-tight mb-3">
-            newtaxlaws_ng
-            <span className="text-primary">.</span>
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-[90%] mx-auto">
-            See how the new 2026 tax laws affect your money.
-          </p>
 
-          <div className="mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-sm text-muted-foreground max-w-[90%] mx-auto">
-            <div className="flex items-center gap-2">
-              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-muted text-muted-foreground text-[10px] font-bold ring-1 ring-inset ring-border">1</span>
-              <span>See what's new in 2026</span>
+  return (
+    <main className="min-h-screen font-sans bg-background text-foreground selection:bg-emerald-100 selection:text-emerald-900">
+      <div className="container mx-auto max-w-4xl px-4 py-12 sm:py-20">
+
+        {/* Navigation / Branding */}
+        <nav className="flex items-center justify-between mb-16 sm:mb-24">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white font-serif font-bold text-xl">
+              N
             </div>
-            <div className="flex items-center gap-2">
-              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-muted text-muted-foreground text-[10px] font-bold ring-1 ring-inset ring-border">2</span>
-              <span>Try a sample (fastest way)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-muted text-muted-foreground text-[10px] font-bold ring-1 ring-inset ring-border">3</span>
-              <span>Enter your own numbers → see your result</span>
-            </div>
+            <span className="font-serif font-bold text-xl tracking-tight text-foreground">newtaxlaws_ng</span>
           </div>
-          
-          <div className="mt-8 space-y-6 text-left">
-            <p className="leading-relaxed text-muted-foreground/90">
-              Taxes in Nigeria can be a headache, like Lagos traffic. New rules in 2026 are meant to make it simpler. Now the first ₦800,000 you earn in a year is completely tax-free (you pay ₦0 on it).
-            </p>
-            
-            <div className="space-y-3">
-                <div className="font-code text-muted-foreground">
-                    <span className="text-primary">{'>'}</span> Want the official government document?
-                </div>
-                <a href="https://www.thecable.ng/wp-content/uploads/2026/01/Final-Approved-Copy-for-Print-NIGERIA-TAX-ACT-2025.pdf" target="_blank" rel="noopener noreferrer" className="inline-block">
-                    <Button className="hover:scale-[1.02] hover:shadow-md active:scale-100 transition-transform duration-150">
-                        Download New Tax Laws (PDF)
-                        <ArrowRight className="ml-2" />
-                    </Button>
-                </a>
-            </div>
+          <div className="hidden sm:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800">
+              <ShieldCheck className="w-4 h-4" />
+              Updated for 2026 Act
+            </span>
           </div>
+        </nav>
+
+        {/* Hero Section */}
+        <header className="text-center mb-16 sm:mb-24">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cream-100 border border-emerald-100 text-emerald-800 text-sm font-medium mb-8 animate-fade-in-up">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            New 2026 Tax Rules are Live
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-foreground tracking-tight mb-6 leading-[1.1]">
+            How much will you <br className="hidden sm:block" />
+            <span className="text-primary italic">keep</span> in 2026?
+          </h1>
+
+          <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            The new Nigeria Tax Act 2025 changes everything. See exactly how the new tax-free allowances and rates affect your pocket.
+          </p>
         </header>
 
-        <div className="mb-12 space-y-6">
-          {isMounted ? (
-            <Tabs defaultValue="individuals" className="w-full">
-              <TabsList className="grid h-auto w-full grid-cols-1 gap-3 bg-transparent p-0 md:grid-cols-3">
-                <TabsTrigger value="individuals" className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors text-lg">People &amp; Workers</TabsTrigger>
-                <TabsTrigger value="small-business" className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors text-lg">Small Businesses</TabsTrigger>
-                <TabsTrigger value="large-business" className="flex h-full items-center justify-center text-center p-4 border rounded-md cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-primary/5 transition-colors text-lg">Others</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="individuals" className="mt-6">
-                <ul className="space-y-4 text-muted-foreground/90 pl-2">
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>The first ₦800,000 you earn each year is completely tax-free.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>You pay 0% on the first ₦800k, then 15% on income up to ₦3 million total, 18% next, 21%, 23%, and 25% for the highest earners.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Low earners (especially minimum wage and entry-level) pay much less tax — or none at all.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>You can deduct 20% of your annual rent (up to ₦500,000 max) from your taxable income.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Interest paid on business loans can be deducted.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Loans you take (personal or business) are not treated as taxable income.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Donations to approved charities are deductible.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Business spending on research &amp; development is deductible.</span>
-                  </li>
-                   <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Basic food, medicine, books, school fees, and certain medical services remain VAT-free.</span>
-                  </li>
-                   <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Compensation for job loss or injury up to ₦50 million is tax-free.</span>
-                  </li>
-                </ul>
-              </TabsContent>
-              
-              <TabsContent value="small-business" className="mt-6">
-                <ul className="space-y-4 text-muted-foreground/90 pl-2">
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>If your annual turnover is under ₦100 million and assets under ₦250 million, you pay 0% company income tax.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Most small businesses are exempt from the new 4% development levy.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>You can choose simple presumptive tax — pay a small flat percentage of your total sales instead of calculating detailed profits.</span>
-                  </li>
-                </ul>
-              </TabsContent>
+        {/* Main Content Area */}
+        <div className="grid gap-12 lg:gap-24">
 
-              <TabsContent value="large-business" className="mt-6">
-                <ul className="space-y-4 text-muted-foreground/90 pl-2">
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Companies with turnover over ₦100 million pay 30% on profits.</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>All companies pay a new 4% development levy (this replaces several old levies like education tax).</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Very large international companies must pay at least 15% effective tax rate overall (or top up the difference).</span>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Capital gains from selling assets are now taxed at 30% (previously 10%).</span>
-                  </li>
-                   <li className="flex items-start">
-                      <span className="mr-3 mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/70"></span>
-                      <span>Foreign companies pay tax only on income earned in Nigeria (plus withholding taxes on dividends, services, etc.).</span>
-                  </li>
-                </ul>
-              </TabsContent>
-            </Tabs>
-          ) : (
-             <div className="w-full space-y-4">
-                <div className="grid w-full grid-cols-1 h-auto gap-2 md:grid-cols-3">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                </div>
-                <Skeleton className="h-48 w-full" />
+          {/* The Calculator (Center Stage) */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50 to-cream-100 rounded-3xl transform -rotate-1 scale-[1.02] -z-10 opacity-70"></div>
+            <TaxClarityForm />
+          </div>
+
+          {/* Information Tabs */}
+          <div className="max-w-3xl mx-auto w-full">
+            <div className="text-center mb-10">
+              <h2 className="font-serif text-3xl font-bold mb-3">Key Changes at a Glance</h2>
+              <p className="text-muted-foreground">Simplified breakdown of the officially approved act.</p>
             </div>
-          )}
 
-          <p className="text-xs text-muted-foreground/80 pt-4 text-center">
-            Simplified overview from the Nigeria Tax Act 2025 (effective 2026). Full official text available in the PDF above.
-          </p>
-        </div>
+            {isMounted ? (
+              <Tabs defaultValue="individuals" className="w-full">
+                <TabsList className="w-full justify-center bg-transparent h-auto p-1 gap-2 mb-8 flex-wrap">
+                  <TabsTrigger
+                    value="individuals"
+                    className="bg-cream-50 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md border border-transparent data-[state=active]:border-primary/20 px-6 py-2.5 rounded-full transition-all duration-300"
+                  >
+                    For Individuals
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="small-business"
+                    className="bg-cream-50 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md border border-transparent data-[state=active]:border-primary/20 px-6 py-2.5 rounded-full transition-all duration-300"
+                  >
+                    Small Business
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="large-business"
+                    className="bg-cream-50 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md border border-transparent data-[state=active]:border-primary/20 px-6 py-2.5 rounded-full transition-all duration-300"
+                  >
+                    Corporates
+                  </TabsTrigger>
+                </TabsList>
 
-        <TaxClarityForm />
+                <div className="bg-white/50 backdrop-blur-sm border border-emerald-100 rounded-2xl p-6 sm:p-8 shadow-sm">
+                  <TabsContent value="individuals" className="mt-0">
+                    <ul className="space-y-4">
+                      {[
+                        "The first ₦800,000 you earn each year is completely tax-free.",
+                        "New progressive rates: 15% on next ₦2.2m, up to 25% for top earners.",
+                        "Low earners (minimum wage) effectively pay 0% tax.",
+                        "Deduct 20% of your annual rent (up to ₦500k) from taxable income.",
+                        "Personal and business loans are not treated as taxable income.",
+                        "Compensation for job loss up to ₦50 million is tax-free."
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </TabsContent>
 
-        <footer className="mt-24 text-sm text-muted-foreground space-y-8">
-          <div>
-            <h2 className="font-medium text-foreground mb-2">About this tool</h2>
-            <p className="leading-relaxed">
-              This free tool gives a quick guess on how the new 2026 tax rules might change the money you take home. It's for information only, not financial advice. We're not part of the government.
-            </p>
+                  <TabsContent value="small-business" className="mt-0">
+                    <ul className="space-y-4">
+                      {[
+                        "0% Company Income Tax if turnover is under ₦100m.",
+                        "Most small businesses are exempt from the 4% development levy.",
+                        "Presumptive tax option: pay a small flat likelihood percentage.",
+                        "Simplified compliance requirements for SMEs."
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </TabsContent>
+
+                  <TabsContent value="large-business" className="mt-0">
+                    <ul className="space-y-4">
+                      {[
+                        "30% Corporate Tax on profits for turnover >₦100m.",
+                        "New 4% Development Levy replaces Education Tax & IT Levy.",
+                        "Minimum effective tax rate of 15% for multinationals.",
+                        "Capital Gains Tax increased to 30% (from 10%)."
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            ) : (
+              <div className="w-full space-y-4">
+                <Skeleton className="h-12 w-full rounded-full" />
+                <Skeleton className="h-64 w-full rounded-2xl" />
+              </div>
+            )}
           </div>
-          <div>
-            <h2 className="font-medium text-foreground mb-2">Disclaimer</h2>
-            <p className="leading-relaxed">
-             We are not money experts. This is not official tax advice. Please talk to a real tax professional for help with your own money situation. Any choices you make based on this tool are your own.
+
+          {/* Download CTA */}
+          <div className="bg-primary/5 rounded-2xl p-8 text-center border border-primary/10">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <h3 className="font-serif text-xl font-bold mb-2">Want the official source?</h3>
+            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+              Download the full 2025 Nigeria Tax Act PDF to read the legal details yourself.
             </p>
-          </div>
-          <p>
-            Got questions or ideas?{' '}
-            <a href="mailto:feedback@newtaxlaws.ng" className="underline hover:text-primary transition-colors">
-              Send us an email
+            <a href="https://www.thecable.ng/wp-content/uploads/2026/01/Final-Approved-Copy-for-Print-NIGERIA-TAX-ACT-2025.pdf" target="_blank" rel="noopener noreferrer" className="inline-block">
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white transition-colors">
+                Download PDF
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </a>
-            .
-          </p>
-          <p className="text-center text-xs pt-8 text-muted-foreground/80">
-            &copy; 2026 newtaxlaws_ng. All rights reserved.
-          </p>
-        </footer>
+          </div>
+
+          {/* Footer */}
+          <footer className="border-t border-border pt-12 pb-8">
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              <div>
+                <div className="font-serif font-bold text-lg mb-4">newtaxlaws_ng</div>
+                <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
+                  Helping Nigerians understand the 2026 financial landscape with clarity and accuracy.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-8 text-sm">
+                <div>
+                  <h4 className="font-semibold mb-3">Legal</h4>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>Disclaimer</li>
+                    <li>Privacy Policy</li>
+                    <li>Terms of Use</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Contact</h4>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>
+                      <a href="mailto:feedback@newtaxlaws.ng" className="hover:text-primary transition-colors">feedback@newtaxlaws.ng</a>
+                    </li>
+                    <li>Twitter</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="text-center text-xs text-muted-foreground pt-8 border-t border-border/50">
+              <p>&copy; 2026 newtaxlaws_ng. All rights reserved.</p>
+              <p className="mt-2 text-muted-foreground/60">Not official financial advice. Consult a tax professional.</p>
+            </div>
+          </footer>
+        </div>
       </div>
     </main>
   );
