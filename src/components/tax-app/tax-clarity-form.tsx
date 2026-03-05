@@ -364,102 +364,102 @@ export function TaxClarityForm() {
                 )}
               </Button>
             </form>
-          </Form>
 
-          {/* Application Results */}
-          {results && !isCalculating && (
-            <div ref={resultsRef} className="animate-fade-in-up space-y-6 pt-8 border-t border-dashed">
+            {/* Application Results */}
+            {results && !isCalculating && (
+              <div ref={resultsRef} className="animate-fade-in-up space-y-6 pt-8 border-t border-dashed">
 
-              {/* Free Result: Total Tax */}
-              <div className="text-center space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Total Estimated Tax</h3>
-                <div className="text-5xl md:text-6xl font-serif font-bold text-emerald-900 tracking-tight">
-                  {formatCurrency(results.totalTax / periodDivisor)}
-                  <span className="text-lg text-muted-foreground font-sans font-normal ml-1">
-                    /{period === 'monthly' ? 'mo' : 'yr'}
-                  </span>
-                </div>
-                <p className="text-sm text-green-600 font-medium flex items-center justify-center gap-1">
-                  <Check className="h-4 w-4" />
-                  Use this figure for your planning
-                </p>
-              </div>
-
-              {/* Locked Detailed Section */}
-              <div className="relative rounded-xl border border-border overflow-hidden cursor-not-allowed group">
-
-                {/* Blurry Content */}
-                <div className="p-6 bg-muted/20 text-muted-foreground filter blur-[5px] select-none pointer-events-none opacity-60">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center text-lg">
-                      <span>Net Take Home</span>
-                      <span className="font-bold">₦250,000</span>
-                    </div>
-                    <div className="flex justify-between items-center text-lg">
-                      <span>Effective Rate</span>
-                      <span className="font-bold">12.5%</span>
-                    </div>
-                    <div className="h-px bg-border my-4" />
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Exempt Income</span>
-                        <span>₦800,000</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Band 1 (15%)</span>
-                        <span>₦45,000</span>
-                      </div>
-                    </div>
+                {/* Free Result: Total Tax */}
+                <div className="text-center space-y-2">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Total Estimated Tax</h3>
+                  <div className="text-5xl md:text-6xl font-serif font-bold text-emerald-900 tracking-tight">
+                    {formatCurrency(results.totalTax / periodDivisor)}
+                    <span className="text-lg text-muted-foreground font-sans font-normal ml-1">
+                      /{period === 'monthly' ? 'mo' : 'yr'}
+                    </span>
                   </div>
-                </div>
-
-                {/* Unlock Overlay */}
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[2px] p-6 text-center">
-                  <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 mb-4 shadow-sm">
-                    <Lock className="h-6 w-6" />
-                  </div>
-                  <h4 className="font-serif text-xl font-bold text-emerald-950 mb-2">Unlock Full Breakdown</h4>
-                  <p className="text-muted-foreground mb-6 max-w-xs text-sm">
-                    Get your Net Income, Effective Rate, and a downloadable PDF report for your records.
+                  <p className="text-sm text-green-600 font-medium flex items-center justify-center gap-1">
+                    <Check className="h-4 w-4" />
+                    Use this figure for your planning
                   </p>
+                </div>
 
-                  <div className="w-full max-w-xs space-y-3">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="Enter your email"
-                              className="bg-white"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      onClick={handlePayment}
-                      disabled={isPaying}
-                      className="w-full bg-emerald-800 hover:bg-emerald-900 text-white shadow-lg shadow-emerald-900/10"
-                    >
-                      {isPaying ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          Unlock full report — ₦200
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
+                {/* Locked Detailed Section */}
+                <div className="relative rounded-xl border border-border overflow-hidden cursor-not-allowed group">
+
+                  {/* Blurry Content */}
+                  <div className="p-6 bg-muted/20 text-muted-foreground filter blur-[5px] select-none pointer-events-none opacity-60">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center text-lg">
+                        <span>Net Take Home</span>
+                        <span className="font-bold">₦250,000</span>
+                      </div>
+                      <div className="flex justify-between items-center text-lg">
+                        <span>Effective Rate</span>
+                        <span className="font-bold">12.5%</span>
+                      </div>
+                      <div className="h-px bg-border my-4" />
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Exempt Income</span>
+                          <span>₦800,000</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Band 1 (15%)</span>
+                          <span>₦45,000</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Unlock Overlay */}
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[2px] p-6 text-center">
+                    <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 mb-4 shadow-sm">
+                      <Lock className="h-6 w-6" />
+                    </div>
+                    <h4 className="font-serif text-xl font-bold text-emerald-950 mb-2">Unlock Full Breakdown</h4>
+                    <p className="text-muted-foreground mb-6 max-w-xs text-sm">
+                      Get your Net Income, Effective Rate, and a downloadable PDF report for your records.
+                    </p>
+
+                    <div className="w-full max-w-xs space-y-3">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                placeholder="Enter your email"
+                                className="bg-white"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        onClick={handlePayment}
+                        disabled={isPaying}
+                        className="w-full bg-emerald-800 hover:bg-emerald-900 text-white shadow-lg shadow-emerald-900/10"
+                      >
+                        {isPaying ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            Unlock full report — ₦200
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-            </div>
-          )}
+              </div>
+            )}
+          </Form>
         </CardContent>
       </Card>
     </div>
